@@ -14,7 +14,10 @@ export function SupabaseSessionListener() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
-      (_event: AuthChangeEvent, _session: Session | null) => {
+      (event: AuthChangeEvent, _session: Session | null) => {
+        if (event === "INITIAL_SESSION") {
+          return;
+        }
         router.refresh();
       }
     );

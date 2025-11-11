@@ -3,7 +3,7 @@
 import { isToday, isYesterday, subMonths, subWeeks } from "date-fns";
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import useSWRInfinite from "swr/infinite";
 import {
@@ -110,6 +110,15 @@ export function SidebarHistory({ user }: { user: AppUser | undefined }) {
   } = useSWRInfinite<ChatHistory>(getChatHistoryPaginationKey, fetcher, {
     fallbackData: [],
   });
+
+  useEffect(() => {
+    if (!user) {
+      setSize(0);
+      mutate([], false);
+    } else {
+      mutate();
+    }
+  }, [user?.id, mutate, setSize]);
 
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);

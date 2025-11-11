@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
@@ -18,17 +18,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   const session = await getSession();
-
-  if (!session) {
-    redirect("/login");
-  }
+  const sessionUserId = session?.user.id ?? null;
 
   if (chat.visibility === "private") {
-    if (!session.user) {
-      return notFound();
-    }
-
-    if (session.user.id !== chat.userId) {
+    if (!sessionUserId || sessionUserId !== chat.userId) {
       return notFound();
     }
   }
@@ -52,7 +45,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         initialLastContext={chat.lastContext ?? undefined}
         initialMessages={uiMessages}
         initialVisibilityType={chat.visibility}
-        isReadonly={session.user.id !== chat.userId}
+        isReadonly={sessionUserId !== chat.userId}
       />
       <DataStreamHandler />
     </>

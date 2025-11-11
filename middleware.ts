@@ -18,13 +18,13 @@ export async function middleware(request: NextRequest) {
     error,
   } = await supabase.auth.getUser();
 
-  if (error && isDevelopmentEnvironment) {
+  if (error) {
     console.warn("Failed to load Supabase user in middleware", error.message);
   }
 
   if (!user) {
     const { error: anonError } = await supabase.auth.signInAnonymously();
-    if (anonError && isDevelopmentEnvironment) {
+    if (anonError) {
       console.warn("Failed to create anonymous session", anonError.message);
     }
     return response;
