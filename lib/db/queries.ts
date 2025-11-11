@@ -1,84 +1,122 @@
 import "server-only";
 
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gt,
-  gte,
-  inArray,
-  lt,
-  type SQL,
-} from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import type { ArtifactKind } from "@/components/artifact";
 import type { VisibilityType } from "@/components/visibility-selector";
-import { ChatSDKError } from "../errors";
-import type { AppUsage } from "../usage";
-import { generateUUID } from "../utils";
-import {
-  type Chat,
-  chat,
-  type DBMessage,
-  document,
-  message,
-  type Suggestion,
-  stream,
-  suggestion,
-  type User,
-  user,
-  vote,
-} from "./schema";
-import { generateHashedPassword } from "./utils";
+import { ChatSDKError } from "@/lib/errors";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { AppUsage } from "@/lib/usage";
+import type { Chat, DBMessage, Document, Suggestion, Vote } from "./schema";
 
-// Optionally, if not using email/pass login, you can
-// use the Drizzle adapter for Auth.js / NextAuth
-// https://authjs.dev/reference/adapter/drizzle
+const CHAT_TABLE = "chat_conversations";
+const MESSAGE_TABLE = "chat_messages";
+const VOTE_TABLE = "chat_message_votes";
+const DOCUMENT_TABLE = "chat_documents";
+const SUGGESTION_TABLE = "chat_suggestions";
+const STREAM_TABLE = "chat_streams";
 
-// biome-ignore lint: Forbidden non-null assertion.
-const client = postgres(process.env.POSTGRES_URL!);
-const db = drizzle(client);
-
-export async function getUser(email: string): Promise<User[]> {
-  try {
-    return await db.select().from(user).where(eq(user.email, email));
-  } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get user by email"
-    );
+const toIsoString = (value: Date | string): string => {
+  if (value instanceof Date) {
+    return value.toISOString();
   }
-}
 
-export async function createUser(email: string, password: string) {
-  const hashedPassword = generateHashedPassword(password);
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+};
 
-  try {
-    return await db.insert(user).values({ email, password: hashedPassword });
-  } catch (_error) {
-    throw new ChatSDKError("bad_request:database", "Failed to create user");
-  }
-}
+type ChatRow = {
+  id: string;
+  created_at: string;
+  title: string;
+  user_id: string;
+  visibility: VisibilityType;
+  last_context: AppUsage | null;
+};
 
-export async function createGuestUser() {
-  const email = `guest-${Date.now()}`;
-  const password = generateHashedPassword(generateUUID());
+type MessageRow = {
+  id: string;
+  chat_id: string;
+  role: string;
+  parts: unknown[];
+  attachments: unknown[];
+  created_at: string;
+};
 
-  try {
-    return await db.insert(user).values({ email, password }).returning({
-      id: user.id,
-      email: user.email,
-    });
-  } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to create guest user"
-    );
-  }
-}
+type VoteRow = {
+  chat_id: string;
+  message_id: string;
+  is_upvoted: boolean;
+};
+
+type DocumentRow = {
+  id: string;
+  created_at: string;
+  title: string;
+  content: string | null;
+  kind: Document["kind"];
+  user_id: string;
+};
+
+type SuggestionRow = {
+  id: string;
+  document_id: string;
+  document_created_at: string;
+  original_text: string;
+  suggested_text: string;
+  description: string | null;
+  is_resolved: boolean;
+  user_id: string;
+  created_at: string;
+};
+
+type StreamRow = {
+  id: string;
+  chat_id: string;
+  created_at: string;
+};
+
+const mapChat = (row: ChatRow): Chat => ({
+  id: row.id,
+  createdAt: new Date(row.created_at),
+  title: row.title,
+  userId: row.user_id,
+  visibility: row.visibility,
+  lastContext: row.last_context,
+});
+
+const mapMessage = (row: MessageRow): DBMessage => ({
+  id: row.id,
+  chatId: row.chat_id,
+  role: row.role,
+  parts: row.parts,
+  attachments: row.attachments,
+  createdAt: new Date(row.created_at),
+});
+
+const mapVote = (row: VoteRow): Vote => ({
+  chatId: row.chat_id,
+  messageId: row.message_id,
+  isUpvoted: row.is_upvoted,
+});
+
+const mapDocument = (row: DocumentRow): Document => ({
+  id: row.id,
+  createdAt: new Date(row.created_at),
+  title: row.title,
+  content: row.content,
+  kind: row.kind,
+  userId: row.user_id,
+});
+
+const mapSuggestion = (row: SuggestionRow): Suggestion => ({
+  id: row.id,
+  documentId: row.document_id,
+  documentCreatedAt: new Date(row.document_created_at),
+  originalText: row.original_text,
+  suggestedText: row.suggested_text,
+  description: row.description,
+  isResolved: row.is_resolved,
+  userId: row.user_id,
+  createdAt: new Date(row.created_at),
+});
 
 export async function saveChat({
   id,
@@ -91,65 +129,79 @@ export async function saveChat({
   title: string;
   visibility: VisibilityType;
 }) {
-  try {
-    return await db.insert(chat).values({
-      id,
-      createdAt: new Date(),
-      userId,
-      title,
-      visibility,
-    });
-  } catch (_error) {
+  const supabase = await createSupabaseServerClient();
+
+  const { error } = await supabase.from(CHAT_TABLE).insert({
+    id,
+    user_id: userId,
+    title,
+    visibility,
+  });
+
+  if (error) {
     throw new ChatSDKError("bad_request:database", "Failed to save chat");
   }
 }
 
 export async function deleteChatById({ id }: { id: string }) {
-  try {
-    await db.delete(vote).where(eq(vote.chatId, id));
-    await db.delete(message).where(eq(message.chatId, id));
-    await db.delete(stream).where(eq(stream.chatId, id));
+  const supabase = await createSupabaseServerClient();
 
-    const [chatsDeleted] = await db
-      .delete(chat)
-      .where(eq(chat.id, id))
-      .returning();
-    return chatsDeleted;
+  try {
+    await supabase.from(VOTE_TABLE).delete().eq("chat_id", id);
+    await supabase.from(MESSAGE_TABLE).delete().eq("chat_id", id);
+    await supabase.from(STREAM_TABLE).delete().eq("chat_id", id);
+
+    const { data, error } = await supabase
+      .from(CHAT_TABLE)
+      .delete()
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    return data ? mapChat(data) : null;
   } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to delete chat by id"
-    );
+    throw new ChatSDKError("bad_request:database", "Failed to delete chat by id");
   }
 }
 
 export async function deleteAllChatsByUserId({ userId }: { userId: string }) {
-  try {
-    const userChats = await db
-      .select({ id: chat.id })
-      .from(chat)
-      .where(eq(chat.userId, userId));
+  const supabase = await createSupabaseServerClient();
 
-    if (userChats.length === 0) {
+  try {
+    const { data: chats } = await supabase
+      .from(CHAT_TABLE)
+      .select("id")
+      .eq("user_id", userId);
+
+    if (!chats || chats.length === 0) {
       return { deletedCount: 0 };
     }
 
-    const chatIds = userChats.map(c => c.id);
+    const chatIds = chats.map(({ id }) => id);
 
-    await db.delete(vote).where(inArray(vote.chatId, chatIds));
-    await db.delete(message).where(inArray(message.chatId, chatIds));
-    await db.delete(stream).where(inArray(stream.chatId, chatIds));
+    await supabase.from(VOTE_TABLE).delete().in("chat_id", chatIds);
+    await supabase.from(MESSAGE_TABLE).delete().in("chat_id", chatIds);
+    await supabase.from(STREAM_TABLE).delete().in("chat_id", chatIds);
 
-    const deletedChats = await db
-      .delete(chat)
-      .where(eq(chat.userId, userId))
-      .returning();
+    const { data: deletedChats, error } = await supabase
+      .from(CHAT_TABLE)
+      .delete()
+      .in("id", chatIds)
+      .select();
 
-    return { deletedCount: deletedChats.length };
+    if (error) {
+      throw error;
+    }
+
+    return { deletedCount: deletedChats?.length ?? 0 };
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to delete all chats by user id"
+      "Failed to delete all chats by user id",
     );
   }
 }
@@ -165,103 +217,128 @@ export async function getChatsByUserId({
   startingAfter: string | null;
   endingBefore: string | null;
 }) {
+  const supabase = await createSupabaseServerClient();
+  const extendedLimit = limit + 1;
+
   try {
-    const extendedLimit = limit + 1;
-
-    const query = (whereCondition?: SQL<any>) =>
-      db
-        .select()
-        .from(chat)
-        .where(
-          whereCondition
-            ? and(whereCondition, eq(chat.userId, id))
-            : eq(chat.userId, id)
-        )
-        .orderBy(desc(chat.createdAt))
-        .limit(extendedLimit);
-
-    let filteredChats: Chat[] = [];
+    let query = supabase
+      .from(CHAT_TABLE)
+      .select("*")
+      .eq("user_id", id)
+      .order("created_at", { ascending: false })
+      .limit(extendedLimit);
 
     if (startingAfter) {
-      const [selectedChat] = await db
-        .select()
-        .from(chat)
-        .where(eq(chat.id, startingAfter))
-        .limit(1);
+      const chat = await getChatById({ id: startingAfter });
 
-      if (!selectedChat) {
+      if (!chat) {
         throw new ChatSDKError(
           "not_found:database",
-          `Chat with id ${startingAfter} not found`
+          `Chat with id ${startingAfter} not found`,
         );
       }
 
-      filteredChats = await query(gt(chat.createdAt, selectedChat.createdAt));
+      query = query.gt("created_at", chat.createdAt.toISOString());
     } else if (endingBefore) {
-      const [selectedChat] = await db
-        .select()
-        .from(chat)
-        .where(eq(chat.id, endingBefore))
-        .limit(1);
+      const chat = await getChatById({ id: endingBefore });
 
-      if (!selectedChat) {
+      if (!chat) {
         throw new ChatSDKError(
           "not_found:database",
-          `Chat with id ${endingBefore} not found`
+          `Chat with id ${endingBefore} not found`,
         );
       }
 
-      filteredChats = await query(lt(chat.createdAt, selectedChat.createdAt));
-    } else {
-      filteredChats = await query();
+      query = query.lt("created_at", chat.createdAt.toISOString());
     }
 
-    const hasMore = filteredChats.length > limit;
+    const { data, error } = await query;
+
+    if (error) {
+      throw error;
+    }
+
+    const mapped = (data ?? []).map(mapChat);
+    const hasMore = mapped.length > limit;
 
     return {
-      chats: hasMore ? filteredChats.slice(0, limit) : filteredChats,
+      chats: hasMore ? mapped.slice(0, limit) : mapped,
       hasMore,
     };
-  } catch (_error) {
+  } catch (err) {
+    if (err instanceof ChatSDKError) {
+      throw err;
+    }
+
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get chats by user id"
+      "Failed to get chats by user id",
     );
   }
 }
 
 export async function getChatById({ id }: { id: string }) {
+  const supabase = await createSupabaseServerClient();
+
   try {
-    const [selectedChat] = await db.select().from(chat).where(eq(chat.id, id));
-    if (!selectedChat) {
-      return null;
+    const { data, error } = await supabase
+      .from(CHAT_TABLE)
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
     }
 
-    return selectedChat;
+    return data ? mapChat(data) : null;
   } catch (_error) {
     throw new ChatSDKError("bad_request:database", "Failed to get chat by id");
   }
 }
 
 export async function saveMessages({ messages }: { messages: DBMessage[] }) {
+  const supabase = await createSupabaseServerClient();
+
   try {
-    return await db.insert(message).values(messages);
+    const rows = messages.map((message) => ({
+      id: message.id,
+      chat_id: message.chatId,
+      role: message.role,
+      parts: message.parts,
+      attachments: message.attachments,
+      created_at: toIsoString(message.createdAt),
+    }));
+
+    const { error } = await supabase.from(MESSAGE_TABLE).insert(rows);
+
+    if (error) {
+      throw error;
+    }
   } catch (_error) {
     throw new ChatSDKError("bad_request:database", "Failed to save messages");
   }
 }
 
 export async function getMessagesByChatId({ id }: { id: string }) {
+  const supabase = await createSupabaseServerClient();
+
   try {
-    return await db
-      .select()
-      .from(message)
-      .where(eq(message.chatId, id))
-      .orderBy(asc(message.createdAt));
+    const { data, error } = await supabase
+      .from(MESSAGE_TABLE)
+      .select("*")
+      .eq("chat_id", id)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []).map(mapMessage);
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get messages by chat id"
+      "Failed to get messages by chat id",
     );
   }
 }
@@ -275,35 +352,46 @@ export async function voteMessage({
   messageId: string;
   type: "up" | "down";
 }) {
-  try {
-    const [existingVote] = await db
-      .select()
-      .from(vote)
-      .where(and(eq(vote.messageId, messageId)));
+  const supabase = await createSupabaseServerClient();
 
-    if (existingVote) {
-      return await db
-        .update(vote)
-        .set({ isUpvoted: type === "up" })
-        .where(and(eq(vote.messageId, messageId), eq(vote.chatId, chatId)));
+  try {
+    const { error } = await supabase.from(VOTE_TABLE).upsert(
+      {
+        chat_id: chatId,
+        message_id: messageId,
+        is_upvoted: type === "up",
+      },
+      {
+        onConflict: "chat_id,message_id",
+      },
+    );
+
+    if (error) {
+      throw error;
     }
-    return await db.insert(vote).values({
-      chatId,
-      messageId,
-      isUpvoted: type === "up",
-    });
   } catch (_error) {
     throw new ChatSDKError("bad_request:database", "Failed to vote message");
   }
 }
 
 export async function getVotesByChatId({ id }: { id: string }) {
+  const supabase = await createSupabaseServerClient();
+
   try {
-    return await db.select().from(vote).where(eq(vote.chatId, id));
+    const { data, error } = await supabase
+      .from(VOTE_TABLE)
+      .select("*")
+      .eq("chat_id", id);
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []).map(mapVote);
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get votes by chat id"
+      "Failed to get votes by chat id",
     );
   }
 }
@@ -317,57 +405,79 @@ export async function saveDocument({
 }: {
   id: string;
   title: string;
-  kind: ArtifactKind;
-  content: string;
+  kind: Document["kind"];
+  content: string | null;
   userId: string;
 }) {
+  const supabase = await createSupabaseServerClient();
+
   try {
-    return await db
-      .insert(document)
-      .values({
+    const { data, error } = await supabase
+      .from(DOCUMENT_TABLE)
+      .insert({
         id,
         title,
         kind,
         content,
-        userId,
-        createdAt: new Date(),
+        user_id: userId,
+        created_at: new Date().toISOString(),
       })
-      .returning();
+      .select();
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []).map(mapDocument);
   } catch (_error) {
     throw new ChatSDKError("bad_request:database", "Failed to save document");
   }
 }
 
 export async function getDocumentsById({ id }: { id: string }) {
-  try {
-    const documents = await db
-      .select()
-      .from(document)
-      .where(eq(document.id, id))
-      .orderBy(asc(document.createdAt));
+  const supabase = await createSupabaseServerClient();
 
-    return documents;
+  try {
+    const { data, error } = await supabase
+      .from(DOCUMENT_TABLE)
+      .select("*")
+      .eq("id", id)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []).map(mapDocument);
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get documents by id"
+      "Failed to get documents by id",
     );
   }
 }
 
 export async function getDocumentById({ id }: { id: string }) {
-  try {
-    const [selectedDocument] = await db
-      .select()
-      .from(document)
-      .where(eq(document.id, id))
-      .orderBy(desc(document.createdAt));
+  const supabase = await createSupabaseServerClient();
 
-    return selectedDocument;
+  try {
+    const { data, error } = await supabase
+      .from(DOCUMENT_TABLE)
+      .select("*")
+      .eq("id", id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    return data ? mapDocument(data) : null;
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get document by id"
+      "Failed to get document by id",
     );
   }
 }
@@ -379,24 +489,32 @@ export async function deleteDocumentsByIdAfterTimestamp({
   id: string;
   timestamp: Date;
 }) {
-  try {
-    await db
-      .delete(suggestion)
-      .where(
-        and(
-          eq(suggestion.documentId, id),
-          gt(suggestion.documentCreatedAt, timestamp)
-        )
-      );
+  const supabase = await createSupabaseServerClient();
+  const timestampIso = timestamp.toISOString();
 
-    return await db
-      .delete(document)
-      .where(and(eq(document.id, id), gt(document.createdAt, timestamp)))
-      .returning();
+  try {
+    await supabase
+      .from(SUGGESTION_TABLE)
+      .delete()
+      .eq("document_id", id)
+      .gt("document_created_at", timestampIso);
+
+    const { data, error } = await supabase
+      .from(DOCUMENT_TABLE)
+      .delete()
+      .eq("id", id)
+      .gt("created_at", timestampIso)
+      .select();
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []).map(mapDocument);
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to delete documents by id after timestamp"
+      "Failed to delete documents by id after timestamp",
     );
   }
 }
@@ -406,12 +524,30 @@ export async function saveSuggestions({
 }: {
   suggestions: Suggestion[];
 }) {
+  const supabase = await createSupabaseServerClient();
+
   try {
-    return await db.insert(suggestion).values(suggestions);
+    const rows = suggestions.map((suggestion) => ({
+      id: suggestion.id,
+      document_id: suggestion.documentId,
+      document_created_at: toIsoString(suggestion.documentCreatedAt),
+      original_text: suggestion.originalText,
+      suggested_text: suggestion.suggestedText,
+      description: suggestion.description,
+      is_resolved: suggestion.isResolved,
+      user_id: suggestion.userId,
+      created_at: toIsoString(suggestion.createdAt),
+    }));
+
+    const { error } = await supabase.from(SUGGESTION_TABLE).insert(rows);
+
+    if (error) {
+      throw error;
+    }
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to save suggestions"
+      "Failed to save suggestions",
     );
   }
 }
@@ -421,26 +557,46 @@ export async function getSuggestionsByDocumentId({
 }: {
   documentId: string;
 }) {
+  const supabase = await createSupabaseServerClient();
+
   try {
-    return await db
-      .select()
-      .from(suggestion)
-      .where(eq(suggestion.documentId, documentId));
+    const { data, error } = await supabase
+      .from(SUGGESTION_TABLE)
+      .select("*")
+      .eq("document_id", documentId)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []).map(mapSuggestion);
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get suggestions by document id"
+      "Failed to get suggestions by document id",
     );
   }
 }
 
 export async function getMessageById({ id }: { id: string }) {
+  const supabase = await createSupabaseServerClient();
+
   try {
-    return await db.select().from(message).where(eq(message.id, id));
+    const { data, error } = await supabase
+      .from(MESSAGE_TABLE)
+      .select("*")
+      .eq("id", id);
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []).map(mapMessage);
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get message by id"
+      "Failed to get message by id",
     );
   }
 }
@@ -452,35 +608,41 @@ export async function deleteMessagesByChatIdAfterTimestamp({
   chatId: string;
   timestamp: Date;
 }) {
+  const supabase = await createSupabaseServerClient();
+  const timestampIso = timestamp.toISOString();
+
   try {
-    const messagesToDelete = await db
-      .select({ id: message.id })
-      .from(message)
-      .where(
-        and(eq(message.chatId, chatId), gte(message.createdAt, timestamp))
-      );
+    const { data: messages, error: selectError } = await supabase
+      .from(MESSAGE_TABLE)
+      .select("id")
+      .eq("chat_id", chatId)
+      .gte("created_at", timestampIso);
 
-    const messageIds = messagesToDelete.map(
-      (currentMessage) => currentMessage.id
-    );
-
-    if (messageIds.length > 0) {
-      await db
-        .delete(vote)
-        .where(
-          and(eq(vote.chatId, chatId), inArray(vote.messageId, messageIds))
-        );
-
-      return await db
-        .delete(message)
-        .where(
-          and(eq(message.chatId, chatId), inArray(message.id, messageIds))
-        );
+    if (selectError) {
+      throw selectError;
     }
+
+    const messageIds = (messages ?? []).map(({ id }) => id);
+
+    if (messageIds.length === 0) {
+      return;
+    }
+
+    await supabase
+      .from(VOTE_TABLE)
+      .delete()
+      .eq("chat_id", chatId)
+      .in("message_id", messageIds);
+
+    await supabase
+      .from(MESSAGE_TABLE)
+      .delete()
+      .eq("chat_id", chatId)
+      .in("id", messageIds);
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to delete messages by chat id after timestamp"
+      "Failed to delete messages by chat id after timestamp",
     );
   }
 }
@@ -490,14 +652,23 @@ export async function updateChatVisibilityById({
   visibility,
 }: {
   chatId: string;
-  visibility: "private" | "public";
+  visibility: VisibilityType;
 }) {
+  const supabase = await createSupabaseServerClient();
+
   try {
-    return await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
+    const { error } = await supabase
+      .from(CHAT_TABLE)
+      .update({ visibility })
+      .eq("id", chatId);
+
+    if (error) {
+      throw error;
+    }
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to update chat visibility by id"
+      "Failed to update chat visibility by id",
     );
   }
 }
@@ -507,17 +678,17 @@ export async function updateChatLastContextById({
   context,
 }: {
   chatId: string;
-  // Store merged server-enriched usage object
   context: AppUsage;
 }) {
+  const supabase = await createSupabaseServerClient();
+
   try {
-    return await db
-      .update(chat)
-      .set({ lastContext: context })
-      .where(eq(chat.id, chatId));
+    await supabase
+      .from(CHAT_TABLE)
+      .update({ last_context: context })
+      .eq("id", chatId);
   } catch (error) {
     console.warn("Failed to update lastContext for chat", chatId, error);
-    return;
   }
 }
 
@@ -528,29 +699,41 @@ export async function getMessageCountByUserId({
   id: string;
   differenceInHours: number;
 }) {
+  const supabase = await createSupabaseServerClient();
+  const threshold = new Date(Date.now() - differenceInHours * 60 * 60 * 1000).toISOString();
+
   try {
-    const twentyFourHoursAgo = new Date(
-      Date.now() - differenceInHours * 60 * 60 * 1000
-    );
+    const { data: chats, error: chatError } = await supabase
+      .from(CHAT_TABLE)
+      .select("id")
+      .eq("user_id", id);
 
-    const [stats] = await db
-      .select({ count: count(message.id) })
-      .from(message)
-      .innerJoin(chat, eq(message.chatId, chat.id))
-      .where(
-        and(
-          eq(chat.userId, id),
-          gte(message.createdAt, twentyFourHoursAgo),
-          eq(message.role, "user")
-        )
-      )
-      .execute();
+    if (chatError) {
+      throw chatError;
+    }
 
-    return stats?.count ?? 0;
+    if (!chats || chats.length === 0) {
+      return 0;
+    }
+
+    const chatIds = chats.map(({ id }) => id);
+
+    const { count, error } = await supabase
+      .from(MESSAGE_TABLE)
+      .select("id", { head: true, count: "exact" })
+      .in("chat_id", chatIds)
+      .eq("role", "user")
+      .gte("created_at", threshold);
+
+    if (error) {
+      throw error;
+    }
+
+    return count ?? 0;
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get message count by user id"
+      "Failed to get message count by user id",
     );
   }
 }
@@ -562,32 +745,45 @@ export async function createStreamId({
   streamId: string;
   chatId: string;
 }) {
+  const supabase = await createSupabaseServerClient();
+
   try {
-    await db
-      .insert(stream)
-      .values({ id: streamId, chatId, createdAt: new Date() });
+    const { error } = await supabase.from(STREAM_TABLE).insert({
+      id: streamId,
+      chat_id: chatId,
+      created_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      throw error;
+    }
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to create stream id"
+      "Failed to create stream id",
     );
   }
 }
 
 export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
-  try {
-    const streamIds = await db
-      .select({ id: stream.id })
-      .from(stream)
-      .where(eq(stream.chatId, chatId))
-      .orderBy(asc(stream.createdAt))
-      .execute();
+  const supabase = await createSupabaseServerClient();
 
-    return streamIds.map(({ id }) => id);
+  try {
+    const { data, error } = await supabase
+      .from(STREAM_TABLE)
+      .select("id")
+      .eq("chat_id", chatId)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []).map(({ id }) => id);
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get stream ids by chat id"
+      "Failed to get stream ids by chat id",
     );
   }
 }

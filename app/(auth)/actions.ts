@@ -2,9 +2,7 @@
 
 import { z } from "zod";
 
-import { createUser, getUser } from "@/lib/db/queries";
-
-import { signIn } from "./auth";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const authFormSchema = z.object({
   email: z.string().email(),
@@ -19,17 +17,22 @@ export const login = async (
   _: LoginActionState,
   formData: FormData
 ): Promise<LoginActionState> => {
+  const supabase = await createSupabaseServerClient();
+
   try {
     const validatedData = authFormSchema.parse({
       email: formData.get("email"),
       password: formData.get("password"),
     });
 
-    await signIn("credentials", {
+    const { error } = await supabase.auth.signInWithPassword({
       email: validatedData.email,
       password: validatedData.password,
-      redirect: false,
     });
+
+    if (error) {
+      return { status: "failed" };
+    }
 
     return { status: "success" };
   } catch (error) {
@@ -55,23 +58,30 @@ export const register = async (
   _: RegisterActionState,
   formData: FormData
 ): Promise<RegisterActionState> => {
+  const supabase = await createSupabaseServerClient();
+
   try {
     const validatedData = authFormSchema.parse({
       email: formData.get("email"),
       password: formData.get("password"),
     });
 
-    const [user] = await getUser(validatedData.email);
-
-    if (user) {
-      return { status: "user_exists" } as RegisterActionState;
-    }
-    await createUser(validatedData.email, validatedData.password);
-    await signIn("credentials", {
+    const { error } = await supabase.auth.signUp({
       email: validatedData.email,
       password: validatedData.password,
-      redirect: false,
     });
+
+    if (error) {
+      const message = error.message?.toLowerCase() ?? "";
+      if (
+        error.code === "user_already_exists" ||
+        message.includes("already registered") ||
+        message.includes("exists")
+      ) {
+        return { status: "user_exists" };
+      }
+      return { status: "failed" };
+    }
 
     return { status: "success" };
   } catch (error) {

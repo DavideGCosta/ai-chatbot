@@ -19,3 +19,17 @@ export const chatModels: ChatModel[] = [
       "Uses advanced chain-of-thought reasoning for complex problems",
   },
 ];
+
+const chatModelIds = chatModels.map((model) => model.id);
+
+export function isValidChatModelId(
+  value: string | null | undefined
+): value is ChatModel["id"] {
+  return chatModelIds.includes(value as ChatModel["id"]);
+}
+
+export function getSafeChatModelId(
+  value: string | null | undefined
+): ChatModel["id"] {
+  return isValidChatModelId(value) ? value : DEFAULT_CHAT_MODEL;
+}

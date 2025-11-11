@@ -29,10 +29,10 @@
   - Styling with [Tailwind CSS](https://tailwindcss.com)
   - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
 - Data Persistence
-  - [Neon Serverless Postgres](https://vercel.com/marketplace/neon) for saving chat history and user data
+  - [Supabase Postgres](https://supabase.com) for saving chat history and user data with built-in RLS
   - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
-- [Auth.js](https://authjs.dev)
-  - Simple and secure authentication
+- [Supabase Auth](https://supabase.com/docs/guides/auth)
+  - Email/password and anonymous authentication managed by Supabase
 
 ## Model Providers
 
@@ -64,8 +64,14 @@ You will need to use the environment variables [defined in `.env.example`](.env.
 
 ```bash
 pnpm install
-pnpm db:migrate # Setup database or apply latest database changes
 pnpm dev
+```
+
+Add your Supabase credentials to `.env.local`:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=<your-project-url>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
 ```
 
 Your app template should now be running on [localhost:3000](http://localhost:3000).

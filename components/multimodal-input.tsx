@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SelectItem } from "@/components/ui/select";
-import { chatModels } from "@/lib/ai/models";
+import { chatModels, getSafeChatModelId } from "@/lib/ai/models";
 import { myProvider } from "@/lib/ai/providers";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
@@ -195,9 +195,11 @@ function PureMultimodalInput({
     }
   }, []);
 
+  const safeSelectedModelId = getSafeChatModelId(selectedModelId);
+
   const _modelResolver = useMemo(() => {
-    return myProvider.languageModel(selectedModelId);
-  }, [selectedModelId]);
+    return myProvider.languageModel(safeSelectedModelId);
+  }, [safeSelectedModelId]);
 
   const contextProps = useMemo(
     () => ({
@@ -371,12 +373,12 @@ function PureMultimodalInput({
           <PromptInputTools className="gap-0 sm:gap-0.5">
             <AttachmentsButton
               fileInputRef={fileInputRef}
-              selectedModelId={selectedModelId}
+              selectedModelId={safeSelectedModelId}
               status={status}
             />
             <ModelSelectorCompact
               onModelChange={onModelChange}
-              selectedModelId={selectedModelId}
+              selectedModelId={safeSelectedModelId}
             />
           </PromptInputTools>
 
@@ -430,7 +432,8 @@ function PureAttachmentsButton({
   status: UseChatHelpers<ChatMessage>["status"];
   selectedModelId: string;
 }) {
-  const isReasoningModel = selectedModelId === "chat-model-reasoning";
+  const safeSelectedModelId = getSafeChatModelId(selectedModelId);
+  const isReasoningModel = safeSelectedModelId === "chat-model-reasoning";
 
   return (
     <Button
@@ -457,11 +460,13 @@ function PureModelSelectorCompact({
   selectedModelId: string;
   onModelChange?: (modelId: string) => void;
 }) {
-  const [optimisticModelId, setOptimisticModelId] = useState(selectedModelId);
+  const safeSelectedModelId = getSafeChatModelId(selectedModelId);
+  const [optimisticModelId, setOptimisticModelId] =
+    useState(safeSelectedModelId);
 
   useEffect(() => {
-    setOptimisticModelId(selectedModelId);
-  }, [selectedModelId]);
+    setOptimisticModelId(safeSelectedModelId);
+  }, [safeSelectedModelId]);
 
   const selectedModel = chatModels.find(
     (model) => model.id === optimisticModelId

@@ -10,11 +10,12 @@ import {
   getMessageById,
   updateChatVisibilityById,
 } from "@/lib/db/queries";
+import { getSafeChatModelId } from "@/lib/ai/models";
 import { getTextFromMessage } from "@/lib/utils";
 
 export async function saveChatModelAsCookie(model: string) {
   const cookieStore = await cookies();
-  cookieStore.set("chat-model", model);
+  cookieStore.set("chat-model", getSafeChatModelId(model));
 }
 
 export async function generateTitleFromUserMessage({
