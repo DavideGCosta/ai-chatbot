@@ -1,13 +1,13 @@
 "use client";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   createContext,
+  type ReactNode,
   useContext,
   useMemo,
   useState,
-  type ReactNode,
 } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type SupabaseContextValue = {

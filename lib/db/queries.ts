@@ -67,12 +67,6 @@ type SuggestionRow = {
   created_at: string;
 };
 
-type StreamRow = {
-  id: string;
-  chat_id: string;
-  created_at: string;
-};
-
 const mapChat = (row: ChatRow): Chat => ({
   id: row.id,
   createdAt: new Date(row.created_at),
@@ -181,7 +175,7 @@ export async function deleteAllChatsByUserId({ userId }: { userId: string }) {
       return { deletedCount: 0 };
     }
 
-    const chatIds = chats.map(({ id }) => id);
+    const chatIds = chats.map((chat) => chat.id);
 
     await supabase.from(VOTE_TABLE).delete().in("chat_id", chatIds);
     await supabase.from(MESSAGE_TABLE).delete().in("chat_id", chatIds);

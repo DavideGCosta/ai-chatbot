@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import { getSafeChatModelId } from "@/lib/ai/models";
@@ -8,10 +7,6 @@ import { generateUUID } from "@/lib/utils";
 
 export default async function Page() {
   const session = await getSession();
-
-  if (!session) {
-    redirect("/login");
-  }
 
   const id = generateUUID();
 
@@ -27,7 +22,7 @@ export default async function Page() {
         initialChatModel={initialModelId}
         initialMessages={[]}
         initialVisibilityType="private"
-        isReadonly={false}
+        isReadonly={!session?.user}
         key={id}
       />
       <DataStreamHandler />

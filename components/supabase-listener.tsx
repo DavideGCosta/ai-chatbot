@@ -2,13 +2,12 @@
 
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useSupabase } from "./supabase-provider";
 
 export function SupabaseSessionListener() {
   const { supabase } = useSupabase();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     const {
@@ -25,7 +24,7 @@ export function SupabaseSessionListener() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase, router, pathname]);
+  }, [supabase, router]);
 
   return null;
 }
