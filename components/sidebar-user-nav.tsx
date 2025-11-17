@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronUp, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -26,11 +26,13 @@ import { cn } from "@/lib/utils";
 import { PreferencesDialog } from "./preferences-dialog";
 import { useSupabase } from "./supabase-provider";
 import { toast } from "./toast";
+import { useSidebar } from "./ui/sidebar";
 
 export function SidebarUserNav({ user }: { user: AppUser }) {
   const router = useRouter();
   const { supabase } = useSupabase();
   const { setTheme, resolvedTheme, theme } = useTheme();
+  const { state: sidebarState } = useSidebar();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
 
@@ -42,6 +44,7 @@ export function SidebarUserNav({ user }: { user: AppUser }) {
       : (displayEmail.split("@")[0] ?? "User");
   const displayName = isGuest ? "Guest" : derivedDisplayName;
   const membershipLabel = isGuest ? "Guest" : "Member";
+  const avatarSize = sidebarState === "collapsed" ? "sm" : "md";
 
   const activeTheme =
     getThemeFromValue(theme) ?? getThemeFromValue(resolvedTheme) ?? "system";
@@ -85,13 +88,18 @@ export function SidebarUserNav({ user }: { user: AppUser }) {
           <DropdownMenu onOpenChange={setIsMenuOpen} open={isMenuOpen}>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
-                className="h-12 gap-3 bg-background/70 pr-3 text-left data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                className={cn(
+                  "h-12 gap-3 bg-background/70 text-left",
+                  "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
+                  "group-data-[collapsible=icon]:!gap-0 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:overflow-visible"
+                )}
                 data-testid="user-nav-button"
               >
                 <UserAvatar
                   email={user.email}
                   fallbackLabel={displayName}
                   imageUrl={user.avatarUrl}
+                  size={avatarSize}
                 />
                 <div className="flex min-w-0 flex-1 flex-col leading-tight group-data-[collapsible=icon]:hidden">
                   <span
@@ -104,21 +112,15 @@ export function SidebarUserNav({ user }: { user: AppUser }) {
                     {membershipLabel}
                   </span>
                 </div>
-                <ChevronUp
-                  className={cn(
-                    "ml-auto h-4 w-4 transition-transform",
-                    isMenuOpen ? "rotate-180" : "rotate-0"
-                  )}
-                />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="w-[280px] space-y-3 rounded-2xl border border-border/60 bg-sidebar/80 p-3 text-sm shadow-2xl backdrop-blur"
+              className="text-sm shadow-2xl"
               data-testid="user-nav-menu"
               side="top"
             >
-              <div className="flex items-center gap-3 rounded-xl border border-border/60 p-3">
+              <div className="flex items-center gap-3 p-3">
                 <UserAvatar
                   email={user.email}
                   fallbackLabel={displayName}
@@ -141,7 +143,7 @@ export function SidebarUserNav({ user }: { user: AppUser }) {
               <DropdownMenuSeparator />
               <div className="space-y-2" data-testid="user-nav-item-theme">
                 <div className="flex items-center justify-between font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-                  <span>Theme</span>
+                  <span className="px-1">Theme</span>
                   <Button
                     className="h-7 w-7 rounded-full"
                     onClick={openPreferences}
@@ -233,7 +235,7 @@ function UserAvatar({
 
   const src = shouldUseGeneratedAvatar
     ? `https://avatar.vercel.sh/${encodeURIComponent(email ?? initials)}.svg`
-    : imageUrl ?? "";
+    : (imageUrl ?? "");
 
   return (
     <Image
