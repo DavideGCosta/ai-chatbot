@@ -8,9 +8,9 @@ import { SupabaseProvider } from "@/components/supabase-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://chat.vercel.ai"),
-  title: "Next.js Chatbot Template",
-  description: "Next.js chatbot template using the AI SDK.",
+  metadataBase: new URL("https://sciqnt.com"), // Update if there's a domain
+  title: "SciQnt - Financial Markets AI Assistant",
+  description: "AI-powered chatbot for financial analysis, portfolio management, and market insights.",
 };
 
 export const viewport = {
@@ -73,6 +73,64 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        {/* SVG filters for liquid-glass distortion (container + buttons)
+            Based on: https://github.com/lucasromerodb/liquid-glass-effect-macos
+        */}
+        <svg
+          aria-hidden="true"
+          height="0"
+          style={{ position: "absolute" }}
+          width="0"
+        >
+          <defs>
+            <filter
+              id="container-glass"
+              x="0%"
+              y="0%"
+              width="100%"
+              height="100%"
+            >
+              <feTurbulence
+                baseFrequency="0.008 0.008"
+                numOctaves="2"
+                result="noise"
+                seed="92"
+                type="fractalNoise"
+              />
+              <feGaussianBlur in="noise" result="blur" stdDeviation="0.02" />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="blur"
+                scale="77"
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+            <filter
+              id="btn-glass"
+              x="0%"
+              y="0%"
+              width="100%"
+              height="100%"
+            >
+              <feTurbulence
+                baseFrequency="0.008 0.008"
+                numOctaves="2"
+                result="noise"
+                seed="92"
+                type="fractalNoise"
+              />
+              <feGaussianBlur in="noise" result="blur" stdDeviation="0.02" />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="blur"
+                scale="40"
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+          </defs>
+        </svg>
         <SupabaseProvider>
           <SupabaseSessionListener />
           <ThemeProvider

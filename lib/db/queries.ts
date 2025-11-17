@@ -2,6 +2,7 @@ import "server-only";
 
 import type { VisibilityType } from "@/components/visibility-selector";
 import { ChatSDKError } from "@/lib/errors";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { AppUsage } from "@/lib/usage";
 import type { Chat, DBMessage, Document, Suggestion, Vote } from "./schema";
@@ -19,7 +20,9 @@ const toIsoString = (value: Date | string): string => {
   }
 
   const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+  return Number.isNaN(parsed.getTime())
+    ? new Date().toISOString()
+    : parsed.toISOString();
 };
 
 type ChatRow = {
@@ -158,7 +161,10 @@ export async function deleteChatById({ id }: { id: string }) {
 
     return data ? mapChat(data) : null;
   } catch (_error) {
-    throw new ChatSDKError("bad_request:database", "Failed to delete chat by id");
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to delete chat by id"
+    );
   }
 }
 
@@ -195,7 +201,7 @@ export async function deleteAllChatsByUserId({ userId }: { userId: string }) {
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to delete all chats by user id",
+      "Failed to delete all chats by user id"
     );
   }
 }
@@ -228,7 +234,7 @@ export async function getChatsByUserId({
       if (!chat) {
         throw new ChatSDKError(
           "not_found:database",
-          `Chat with id ${startingAfter} not found`,
+          `Chat with id ${startingAfter} not found`
         );
       }
 
@@ -239,7 +245,7 @@ export async function getChatsByUserId({
       if (!chat) {
         throw new ChatSDKError(
           "not_found:database",
-          `Chat with id ${endingBefore} not found`,
+          `Chat with id ${endingBefore} not found`
         );
       }
 
@@ -266,7 +272,7 @@ export async function getChatsByUserId({
 
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get chats by user id",
+      "Failed to get chats by user id"
     );
   }
 }
@@ -332,7 +338,7 @@ export async function getMessagesByChatId({ id }: { id: string }) {
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get messages by chat id",
+      "Failed to get messages by chat id"
     );
   }
 }
@@ -357,7 +363,7 @@ export async function voteMessage({
       },
       {
         onConflict: "chat_id,message_id",
-      },
+      }
     );
 
     if (error) {
@@ -385,7 +391,7 @@ export async function getVotesByChatId({ id }: { id: string }) {
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get votes by chat id",
+      "Failed to get votes by chat id"
     );
   }
 }
@@ -446,7 +452,7 @@ export async function getDocumentsById({ id }: { id: string }) {
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get documents by id",
+      "Failed to get documents by id"
     );
   }
 }
@@ -471,7 +477,7 @@ export async function getDocumentById({ id }: { id: string }) {
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get document by id",
+      "Failed to get document by id"
     );
   }
 }
@@ -508,7 +514,7 @@ export async function deleteDocumentsByIdAfterTimestamp({
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to delete documents by id after timestamp",
+      "Failed to delete documents by id after timestamp"
     );
   }
 }
@@ -541,7 +547,7 @@ export async function saveSuggestions({
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to save suggestions",
+      "Failed to save suggestions"
     );
   }
 }
@@ -568,7 +574,7 @@ export async function getSuggestionsByDocumentId({
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get suggestions by document id",
+      "Failed to get suggestions by document id"
     );
   }
 }
@@ -590,7 +596,7 @@ export async function getMessageById({ id }: { id: string }) {
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get message by id",
+      "Failed to get message by id"
     );
   }
 }
@@ -636,7 +642,7 @@ export async function deleteMessagesByChatIdAfterTimestamp({
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to delete messages by chat id after timestamp",
+      "Failed to delete messages by chat id after timestamp"
     );
   }
 }
@@ -662,7 +668,7 @@ export async function updateChatVisibilityById({
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to update chat visibility by id",
+      "Failed to update chat visibility by id"
     );
   }
 }
@@ -694,7 +700,9 @@ export async function getMessageCountByUserId({
   differenceInHours: number;
 }) {
   const supabase = await createSupabaseServerClient();
-  const threshold = new Date(Date.now() - differenceInHours * 60 * 60 * 1000).toISOString();
+  const threshold = new Date(
+    Date.now() - differenceInHours * 60 * 60 * 1000
+  ).toISOString();
 
   try {
     const { data: chats, error: chatError } = await supabase
@@ -710,7 +718,7 @@ export async function getMessageCountByUserId({
       return 0;
     }
 
-    const chatIds = chats.map(({ id }) => id);
+    const chatIds = chats.map(({ id: chatId }) => chatId);
 
     const { count, error } = await supabase
       .from(MESSAGE_TABLE)
@@ -727,7 +735,7 @@ export async function getMessageCountByUserId({
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get message count by user id",
+      "Failed to get message count by user id"
     );
   }
 }
@@ -754,7 +762,7 @@ export async function createStreamId({
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to create stream id",
+      "Failed to create stream id"
     );
   }
 }
@@ -777,7 +785,22 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get stream ids by chat id",
+      "Failed to get stream ids by chat id"
     );
   }
+}
+
+export async function deleteUserAccountById({ userId }: { userId: string }) {
+  const supabaseAdmin = createSupabaseAdminClient();
+
+  const { error } = await supabaseAdmin.auth.admin.deleteUser(userId, false);
+
+  if (error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      error.message ?? "Failed to delete user account."
+    );
+  }
+
+  return { success: true };
 }

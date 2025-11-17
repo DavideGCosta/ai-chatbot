@@ -120,11 +120,7 @@ const Tool = ({
           {selectedTool === description ? <ArrowUpIcon /> : icon}
         </motion.div>
       </TooltipTrigger>
-      <TooltipContent
-        className="rounded-2xl bg-foreground p-3 px-4 text-background"
-        side="left"
-        sideOffset={16}
-      >
+      <TooltipContent side="left" sideOffset={16}>
         {description}
       </TooltipContent>
     </Tooltip>
@@ -231,11 +227,7 @@ const ReadingLevelSelector = ({
               {currentLevel === 2 ? <SummarizeIcon /> : <ArrowUpIcon />}
             </motion.div>
           </TooltipTrigger>
-          <TooltipContent
-            className="rounded-2xl bg-foreground p-3 px-4 text-background text-sm"
-            side="left"
-            sideOffset={16}
-          >
+          <TooltipContent side="left" sideOffset={16}>
             {LEVELS[currentLevel]}
           </TooltipContent>
         </Tooltip>

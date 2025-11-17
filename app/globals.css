@@ -4,7 +4,7 @@
 @source '../node_modules/streamdown/dist/index.js';
 
 /* Add KaTeX CSS for math rendering */
-@import 'katex/dist/katex.min.css';
+@import "katex/dist/katex.min.css";
 
 /* custom variant for setting dark mode programmatically */
 @custom-variant dark (&:is(.dark, .dark *));
@@ -317,4 +317,106 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Liquid glass treatment for floating sidebar container */
+/* Use granular glass panels instead of full-surface glass */
+.glass-panel {
+  backdrop-filter: blur(18px);
+  background: color-mix(in oklab, white 35%, transparent);
+  border: 1px solid color-mix(in oklab, white 25%, transparent);
+  border-radius: 12px;
+}
+.dark .glass-panel {
+  backdrop-filter: blur(18px);
+  background: color-mix(in oklab, #0a0a0a 35%, transparent);
+  border-color: color-mix(in oklab, white 10%, transparent);
+}
+
+/* Ensure the shadcn sidebar surface is transparent; apply per-panel glass instead */
+.sidebar-no-surface [data-sidebar="sidebar"] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Sonner toast overrides: glassmorphic panel */
+[data-sonner-toast] {
+  background: color-mix(in oklab, white 25%, transparent) !important;
+  border: 1px solid color-mix(in oklab, white 30%, transparent) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45) !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(26px);
+  color: inherit !important;
+}
+[data-sonner-toast]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 100% at 0% 0%,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(255, 255, 255, 0.05) 45%,
+      transparent 70%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
+}
+.dark [data-sonner-toast] {
+  background: color-mix(in oklab, #020202 70%, transparent) !important;
+  border-color: color-mix(in oklab, white 15%, transparent) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Base liquid glass surface with subtle highlight overlay */
+.liquid-glass {
+  background: color-mix(in oklab, white 50%, transparent);
+  border-color: color-mix(in oklab, white 25%, transparent);
+  position: relative;
+}
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background:
+    radial-gradient(
+      120% 100% at 0% 0%,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(255, 255, 255, 0.06) 35%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+.dark .liquid-glass {
+  background: color-mix(in oklab, #0a0a0a 80%, transparent);
+  border-color: color-mix(in oklab, white 10%, transparent);
+}
+.dark .liquid-glass::before {
+  background:
+    radial-gradient(
+      120% 100% at 0% 0%,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.04) 35%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+}
+
+.liquid-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* Distortion layer: use SVG filter for strong liquid-glass effect */
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  -webkit-filter: url(#container-glass);
+  filter: url(#container-glass);
+  overflow: hidden;
+  isolation: isolate;
+  z-index: -1;
 }

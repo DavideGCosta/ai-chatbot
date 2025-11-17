@@ -1,6 +1,21 @@
-## Chat
+# SciQnt
 
-This project is a customized fork of the [Vercel AI Chatbot template](https://vercel.com/templates/next.js/nextjs-ai-chatbot). It keeps the same Next.js App Router + AI SDK experience, but refactors persistence and authentication around Supabase so it can run as a fully managed, multi-tenant chat workspace.
+AI-powered financial markets assistant built with Next.js and AI SDK.
+
+## Features
+
+- Chat about stock trends, portfolio analysis, investment strategies
+- Multi-model support
+- Secure authentication with Supabase
+- Real-time streaming responses
+
+## Getting Started
+
+1. Install dependencies: `pnpm install`
+2. Set up environment variables (see .env.local.example)
+3. Run development server: `pnpm dev`
+
+For production deployment, configure your hosting provider accordingly.
 
 ### How It Works
 - **Next.js 15 + App Router** render the chat UI (messages, artifacts, history sidebar) while streaming completions from the AI SDK (`streamText`).
@@ -13,5 +28,4 @@ This project is a customized fork of the [Vercel AI Chatbot template](https://ve
 2. Rewrote every database query (`lib/db/queries.ts`) to call Supabase directly and introduced schema typings under `lib/db/schema.ts`.
 3. Added Supabase-aware middleware and providers so server routes, layouts, and components (sidebar, history APIs, file uploads, etc.) enforce the new auth model.
 4. Cleaned up tooling by removing Drizzle migrations/scripts and updating `package.json` to pull in `@supabase/supabase-js` + `@supabase/ssr`.
-
-This README is intentionally focused on the Chatbot feature—use the diffs and in-code documentation for deeper implementation details.
+s
