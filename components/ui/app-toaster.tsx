@@ -7,7 +7,7 @@ function AppToaster() {
     <Toaster
       closeButton={false}
       containerAriaLabel="Notification center"
-      offset={{ top: 20, right: -60 }}
+      offset={{ top: 10, right: -60 }}
       position="top-right"
     />
   );
