@@ -86,6 +86,7 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isAnonymousUser, setIsAnonymousUser] = useState(false);
 
   const selectedTheme =
     preferences.theme ??
@@ -104,11 +105,12 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
     const normalizedInitialDisplayName =
       initialDisplayName.trim() ||
       deriveDisplayNameFromEmail(initialAccountEmail);
-    const accountChanges =
-      normalizedEmail !== normalizedInitialEmail ||
-      normalizedDisplayName !== normalizedInitialDisplayName ||
-      newPassword.length > 0 ||
-      confirmPassword.length > 0;
+    const accountChanges = isAnonymousUser
+      ? false
+      : normalizedEmail !== normalizedInitialEmail ||
+        normalizedDisplayName !== normalizedInitialDisplayName ||
+        newPassword.length > 0 ||
+        confirmPassword.length > 0;
     return preferenceChanges || accountChanges;
   }, [
     accountEmail,
@@ -116,6 +118,7 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
     displayName,
     initialAccountEmail,
     initialDisplayName,
+    isAnonymousUser,
     newPassword,
     preferences,
     initialPreferences,
@@ -204,9 +207,25 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
         return;
       }
 
-      const email = data.user?.email ?? "";
-      const metadata =
-        (data.user?.user_metadata as Record<string, unknown>) ?? {};
+      const user = data.user;
+      const anonymousFlag =
+        Boolean((user as { is_anonymous?: boolean } | null)?.is_anonymous) ||
+        !user;
+      setIsAnonymousUser(anonymousFlag);
+
+      if (!user) {
+        setAccountEmail("");
+        setInitialAccountEmail("");
+        setDisplayName("Guest");
+        setInitialDisplayName("Guest");
+        setUserMetadata({});
+        setProfileImage(null);
+        setUserId(null);
+        return;
+      }
+
+      const email = user.email ?? "";
+      const metadata = (user.user_metadata as Record<string, unknown>) ?? {};
       const metadataDisplayName =
         typeof metadata.display_name === "string"
           ? metadata.display_name.trim()
@@ -217,6 +236,18 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
           ? metadataDisplayName
           : fallbackDisplayName;
 
+      if (anonymousFlag) {
+        const guestName = resolvedDisplayName || "Guest";
+        setAccountEmail("");
+        setInitialAccountEmail("");
+        setDisplayName(guestName);
+        setInitialDisplayName(guestName);
+        setUserMetadata(metadata);
+        setProfileImage(null);
+        setUserId(null);
+        return;
+      }
+
       setAccountEmail(email);
       setInitialAccountEmail(email);
       setDisplayName(resolvedDisplayName);
@@ -225,7 +256,7 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
       setProfileImage(
         typeof metadata.avatar_url === "string" ? metadata.avatar_url : null
       );
-      setUserId(data.user?.id ?? null);
+      setUserId(user.id ?? null);
     };
 
     loadAccountProfile();
@@ -274,69 +305,72 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
           ? initialDisplayName.trim()
           : deriveDisplayNameFromEmail(initialAccountEmail);
 
-      const accountUpdates: Parameters<typeof supabase.auth.updateUser>[0] = {};
-
-      const trimmedEmail = accountEmail.trim();
-      const trimmedInitialEmail = initialAccountEmail.trim();
-      if (
-        trimmedEmail &&
-        trimmedEmail.length > 0 &&
-        trimmedEmail !== trimmedInitialEmail
-      ) {
-        accountUpdates.email = trimmedEmail;
-      }
-
-      const wantsPasswordUpdate =
-        newPassword.length > 0 || confirmPassword.length > 0;
-      if (wantsPasswordUpdate) {
-        if (!newPassword || !confirmPassword) {
-          throw new Error("Please enter and confirm your new password.");
-        }
-        if (newPassword !== confirmPassword) {
-          throw new Error("New password and confirmation do not match.");
-        }
-        accountUpdates.password = newPassword;
-      }
-
-      if (normalizedDisplayName !== normalizedInitialDisplayName) {
-        const nextMetadata: Record<string, unknown> = {
-          ...(userMetadata ?? {}),
-          display_name: normalizedDisplayName,
-        };
-        accountUpdates.data = nextMetadata;
-      }
-
       let accountUpdated = false;
 
-      if (Object.keys(accountUpdates).length > 0) {
-        const { error: accountError } =
-          await supabase.auth.updateUser(accountUpdates);
-        if (accountError) {
-          throw new Error(
-            accountError.message ?? "Failed to update your account info."
-          );
+      if (!isAnonymousUser) {
+        const accountUpdates: Parameters<typeof supabase.auth.updateUser>[0] =
+          {};
+
+        const trimmedEmail = accountEmail.trim();
+        const trimmedInitialEmail = initialAccountEmail.trim();
+        if (
+          trimmedEmail &&
+          trimmedEmail.length > 0 &&
+          trimmedEmail !== trimmedInitialEmail
+        ) {
+          accountUpdates.email = trimmedEmail;
         }
 
-        if (accountUpdates.email) {
-          setAccountEmail(accountUpdates.email);
-          setInitialAccountEmail(accountUpdates.email);
-        }
-        if (accountUpdates.data) {
-          const metadataData = accountUpdates.data as Record<string, unknown>;
-          const nextDisplayNameValue =
-            typeof metadataData.display_name === "string"
-              ? metadataData.display_name
-              : normalizedDisplayName;
-          setDisplayName(nextDisplayNameValue);
-          setInitialDisplayName(nextDisplayNameValue);
-          setUserMetadata(metadataData);
-        }
-        if (accountUpdates.password) {
-          setNewPassword("");
-          setConfirmPassword("");
+        const wantsPasswordUpdate =
+          newPassword.length > 0 || confirmPassword.length > 0;
+        if (wantsPasswordUpdate) {
+          if (!newPassword || !confirmPassword) {
+            throw new Error("Please enter and confirm your new password.");
+          }
+          if (newPassword !== confirmPassword) {
+            throw new Error("New password and confirmation do not match.");
+          }
+          accountUpdates.password = newPassword;
         }
 
-        accountUpdated = true;
+        if (normalizedDisplayName !== normalizedInitialDisplayName) {
+          const nextMetadata: Record<string, unknown> = {
+            ...(userMetadata ?? {}),
+            display_name: normalizedDisplayName,
+          };
+          accountUpdates.data = nextMetadata;
+        }
+
+        if (Object.keys(accountUpdates).length > 0) {
+          const { error: accountError } =
+            await supabase.auth.updateUser(accountUpdates);
+          if (accountError) {
+            throw new Error(
+              accountError.message ?? "Failed to update your account info."
+            );
+          }
+
+          if (accountUpdates.email) {
+            setAccountEmail(accountUpdates.email);
+            setInitialAccountEmail(accountUpdates.email);
+          }
+          if (accountUpdates.data) {
+            const metadataData = accountUpdates.data as Record<string, unknown>;
+            const nextDisplayNameValue =
+              typeof metadataData.display_name === "string"
+                ? metadataData.display_name
+                : normalizedDisplayName;
+            setDisplayName(nextDisplayNameValue);
+            setInitialDisplayName(nextDisplayNameValue);
+            setUserMetadata(metadataData);
+          }
+          if (accountUpdates.password) {
+            setNewPassword("");
+            setConfirmPassword("");
+          }
+
+          accountUpdated = true;
+        }
       }
 
       const preferencesChanged =
@@ -630,97 +664,150 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
             </div>
             <div className="flex flex-1 flex-col rounded-2xl px-4">
               <TabsContent className="space-y-2" value="account">
-                <PreferenceRow
-                  description="Choose a profile picture for your account."
-                  title="Profile picture"
-                >
-                  <div className="flex items-center gap-4">
-                    <button
-                      aria-busy={isUploadingAvatar}
-                      className="group relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border/60 bg-background font-medium text-xs transition hover:cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      disabled={isUploadingAvatar}
-                      onClick={handleAvatarClick}
-                      type="button"
-                    >
-                      {profileImage ? (
-                        <Image
-                          alt="User avatar preview"
-                          className="object-cover"
-                          height={96}
-                          src={profileImage}
-                          width={96}
-                        />
-                      ) : (
-                        <span>
-                          {isUploadingAvatar ? "Uploading…" : "Tap to edit"}
-                        </span>
-                      )}
-                      <span
-                        aria-hidden="true"
-                        className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/60 font-semibold text-white text-xs uppercase tracking-wide opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                {isAnonymousUser ? (
+                  <div
+                    className={cn(
+                      "bg-background/40",
+                      "border",
+                      "border-border/60",
+                      "border-dashed",
+                      "flex",
+                      "flex-col",
+                      "items-center",
+                      "justify-center",
+                      "px-6",
+                      "py-12",
+                      "rounded-2xl",
+                      "text-center"
+                    )}
+                  >
+                    <p className="font-semibold text-base">
+                      Sign in to manage your account
+                    </p>
+                    <p className="mt-2 text-muted-foreground text-sm">
+                      Guest sessions can customize preferences, but account
+                      details like email, password, and avatar require a logged
+                      in profile.
+                    </p>
+                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                      <Button
+                        onClick={() => {
+                          onOpenChange(false);
+                          router.push("/login");
+                        }}
                       >
-                        {isUploadingAvatar ? "Uploading…" : "Upload image"}
-                      </span>
-                    </button>
-                    <input
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleAvatarChange}
-                      ref={avatarInputRef}
-                      type="file"
-                    />
-                    {isUploadingAvatar ? (
-                      <p className="text-muted-foreground text-xs">
-                        Uploading avatar…
-                      </p>
-                    ) : null}
+                        Log in
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          onOpenChange(false);
+                          router.push("/register");
+                        }}
+                        variant="outline"
+                      >
+                        Create account
+                      </Button>
+                    </div>
                   </div>
-                </PreferenceRow>
-                <PreferenceRow description="" title="Name">
-                  <Input
-                    autoComplete="name"
-                    className="rounded-2xl"
-                    onChange={(event) => setDisplayName(event.target.value)}
-                    placeholder="Warren Buffett"
-                    type="text"
-                    value={displayName}
-                  />
-                </PreferenceRow>
-                <PreferenceRow description="" title="Email">
-                  <Input
-                    autoComplete="email"
-                    className="rounded-2xl"
-                    onChange={(event) => setAccountEmail(event.target.value)}
-                    placeholder="name@sciqnt.app"
-                    type="email"
-                    value={accountEmail}
-                  />
-                </PreferenceRow>
-                <PreferenceRow
-                  description="Update your password to keep your account secure."
-                  title="Change password"
-                >
-                  <div className="space-y-3">
-                    <Input
-                      autoComplete="new-password"
-                      className="rounded-2xl"
-                      onChange={(event) => setNewPassword(event.target.value)}
-                      placeholder="New password"
-                      type="password"
-                      value={newPassword}
-                    />
-                    <Input
-                      autoComplete="new-password"
-                      className="rounded-2xl"
-                      onChange={(event) =>
-                        setConfirmPassword(event.target.value)
-                      }
-                      placeholder="Confirm new password"
-                      type="password"
-                      value={confirmPassword}
-                    />
-                  </div>
-                </PreferenceRow>
+                ) : (
+                  <>
+                    <PreferenceRow
+                      description="Choose a profile picture for your account."
+                      title="Profile picture"
+                    >
+                      <div className="flex items-center gap-4">
+                        <button
+                          aria-busy={isUploadingAvatar}
+                          className="group relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border/60 bg-background font-medium text-xs transition hover:cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          disabled={isUploadingAvatar}
+                          onClick={handleAvatarClick}
+                          type="button"
+                        >
+                          {profileImage ? (
+                            <Image
+                              alt="User avatar preview"
+                              className="object-cover"
+                              height={96}
+                              src={profileImage}
+                              width={96}
+                            />
+                          ) : (
+                            <span>
+                              {isUploadingAvatar ? "Uploading…" : "Tap to edit"}
+                            </span>
+                          )}
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/60 font-semibold text-white text-xs uppercase tracking-wide opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                          >
+                            {isUploadingAvatar ? "Uploading…" : "Upload image"}
+                          </span>
+                        </button>
+                        <input
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleAvatarChange}
+                          ref={avatarInputRef}
+                          type="file"
+                        />
+                        {isUploadingAvatar ? (
+                          <p className="text-muted-foreground text-xs">
+                            Uploading avatar…
+                          </p>
+                        ) : null}
+                      </div>
+                    </PreferenceRow>
+                    <PreferenceRow description="" title="Name">
+                      <Input
+                        autoComplete="name"
+                        className="rounded-2xl"
+                        onChange={(event) => setDisplayName(event.target.value)}
+                        placeholder="Warren Buffett"
+                        type="text"
+                        value={displayName}
+                      />
+                    </PreferenceRow>
+                    <PreferenceRow description="" title="Email">
+                      <Input
+                        autoComplete="email"
+                        className="rounded-2xl"
+                        onChange={(event) =>
+                          setAccountEmail(event.target.value)
+                        }
+                        placeholder="name@sciqnt.app"
+                        type="email"
+                        value={accountEmail}
+                      />
+                    </PreferenceRow>
+                    <PreferenceRow
+                      description="Update your password to keep your account secure."
+                      title="Change password"
+                    >
+                      <div className="space-y-3">
+                        <Input
+                          autoComplete="new-password"
+                          className="rounded-2xl"
+                          onChange={(event) =>
+                            setNewPassword(event.target.value)
+                          }
+                          placeholder="New password"
+                          type="password"
+                          value={newPassword}
+                        />
+                        <Input
+                          autoComplete="new-password"
+                          className="rounded-2xl"
+                          onChange={(event) =>
+                            setConfirmPassword(event.target.value)
+                          }
+                          placeholder="Confirm new password"
+                          type="password"
+                          value={confirmPassword}
+                        />
+                      </div>
+                    </PreferenceRow>
+                  </>
+                )}
               </TabsContent>
               <TabsContent className="space-y-2" value="theme">
                 <div className="space-y-2">
