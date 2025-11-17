@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
+import { AppToaster } from "@/components/ui/app-toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SupabaseSessionListener } from "@/components/supabase-listener";
 import { SupabaseProvider } from "@/components/supabase-provider";
@@ -139,7 +139,7 @@ export default function RootLayout({
             disableTransitionOnChange
             enableSystem
           >
-            <Toaster position="top-center" />
+            <AppToaster />
             {children}
           </ThemeProvider>
         </SupabaseProvider>

@@ -16,7 +16,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { toast } from "sonner";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SelectItem } from "@/components/ui/select";
@@ -25,6 +24,7 @@ import { myProvider } from "@/lib/ai/providers";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { cn } from "@/lib/utils";
+import { toast } from "@/components/toast";
 import { Context } from "./elements/context";
 import {
   PromptInput,

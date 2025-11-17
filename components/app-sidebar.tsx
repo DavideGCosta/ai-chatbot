@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import {
@@ -19,6 +18,7 @@ import {
   SidebarHistory,
 } from "@/components/sidebar-history";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
+import { toast } from "@/components/toast";
 import { LiquidGlass } from "@/components/ui/liquid-glass";
 import {
   Sidebar,

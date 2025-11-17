@@ -4,7 +4,6 @@ import { isToday, isYesterday, subMonths, subWeeks } from "date-fns";
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import useSWRInfinite from "swr/infinite";
 import {
   AlertDialog,
@@ -25,6 +24,7 @@ import {
 import type { AppUser } from "@/lib/auth/session";
 import type { Chat } from "@/lib/db/schema";
 import { fetcher } from "@/lib/utils";
+import { toast } from "@/components/toast";
 import { LoaderIcon } from "./icons";
 import { ChatItem } from "./sidebar-history-item";
 

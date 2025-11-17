@@ -1,4 +1,4 @@
-import { toast } from "sonner";
+import { toast } from "@/components/toast";
 import { Artifact } from "@/components/create-artifact";
 import { DiffView } from "@/components/diffview";
 import { DocumentSkeleton } from "@/components/document-skeleton";
