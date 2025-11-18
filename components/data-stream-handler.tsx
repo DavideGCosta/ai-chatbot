@@ -18,10 +18,12 @@ export function DataStreamHandler() {
     const newDeltas = dataStream.slice();
     setDataStream([]);
 
+    let currentKind = artifact?.kind ?? initialArtifactData.kind;
+
     for (const delta of newDeltas) {
       const artifactDefinition = artifactDefinitions.find(
         (currentArtifactDefinition) =>
-          currentArtifactDefinition.kind === artifact.kind
+          currentArtifactDefinition.kind === currentKind
       );
 
       if (artifactDefinition?.onStreamPart) {
@@ -76,6 +78,10 @@ export function DataStreamHandler() {
             return draftArtifact;
         }
       });
+
+      if (delta.type === "data-kind") {
+        currentKind = delta.data;
+      }
     }
   }, [artifact, dataStream, setArtifact, setDataStream, setMetadata]);
 
