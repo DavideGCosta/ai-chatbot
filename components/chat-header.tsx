@@ -14,7 +14,8 @@ function AppHeaderComponent() {
         "items-center",
         "justify-between",
         "py-6",
-        "pr-2",
+        "md:pr-2",
+        "sm:px-4",
         "sticky",
         "top-0",
         "z-50",
@@ -25,6 +26,9 @@ function AppHeaderComponent() {
           " "
         )}
       >
+        <div className="md:hidden">
+          <SciQntIcon />
+        </div>
         <SidebarToggle />
       </div>
 
