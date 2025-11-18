@@ -603,10 +603,10 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
 
   return (
     <Drawer onOpenChange={onOpenChange} open={open}>
-      <DrawerContent className="flex w-full flex-col sm:h-[520px]">
-        <DrawerHeader className="flex flex-col gap-2 text-left sm:flex-row sm:items-center sm:justify-between">
+      <DrawerContent className="flex h-[90vh] min-h-[90vh] w-full flex-col md:h-[520px] md:min-h-[520px]">
+        <DrawerHeader className="flex flex-row items-center justify-between gap-2 text-left">
           <DrawerTitle>Preferences</DrawerTitle>
-          <div className="flex flex-row gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-row gap-4">
             <Button
               disabled={!hasChanges || status === "saving"}
               onClick={handleReset}
@@ -621,52 +621,170 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
               onClick={handleSave}
               type="button"
             >
-              {status === "saving" ? "Saving..." : "Save changes"}
+              {status === "saving" ? "Saving..." : "Save"}
             </Button>
           </div>
         </DrawerHeader>
-        <div className="flex-1">
+        <div
+          className={cn(
+            "min-h-0",
+            "flex-1",
+            "min-h-[calc(90vh-150px)]",
+            "h-[calc(90vh-150px)]"
+          )}
+        >
           <Tabs
-            className="flex h-full gap-6"
+            className={cn(
+              "flex",
+              "h-full",
+              "min-h-0",
+              "flex-col",
+              "gap-4",
+              "sm:flex-row",
+              "sm:gap-6"
+            )}
             onValueChange={setActiveTab}
             value={activeTab}
           >
-            <div className="w-full max-w-[220px]">
-              <TabsList className="flex h-auto w-full flex-col gap-1 bg-background">
+            <div className="w-full sm:max-w-[220px]">
+              <TabsList
+                className={cn(
+                  "flex",
+                  "gap-2",
+                  "overflow-x-auto",
+                  "overflow-y-hidden",
+                  "w-full",
+                  "p-1",
+                  "rounded-2xl",
+                  "bg-background/80",
+                  "touch-pan-x",
+                  "sm:h-auto",
+                  "sm:flex-col",
+                  "sm:gap-1",
+                  "sm:overflow-visible",
+                  "sm:rounded-none",
+                  "sm:bg-background",
+                  "sm:p-0"
+                )}
+              >
                 <TabsTrigger
-                  className="w-full justify-start rounded-lg px-3 py-2 text-left font-medium text-sm data-[state=active]:bg-sidebar-accent"
+                  className={cn(
+                    "flex-1",
+                    "whitespace-nowrap",
+                    "rounded-lg",
+                    "px-3",
+                    "py-2",
+                    "text-center",
+                    "text-sm",
+                    "font-medium",
+                    "data-[state=active]:bg-sidebar-accent",
+                    "sm:w-full",
+                    "sm:justify-start",
+                    "sm:text-left"
+                  )}
                   value="account"
                 >
                   Account
                 </TabsTrigger>
                 <TabsTrigger
-                  className="w-full justify-start rounded-lg px-3 py-2 text-left font-medium text-sm data-[state=active]:bg-sidebar-accent"
+                  className={cn(
+                    "flex-1",
+                    "whitespace-nowrap",
+                    "rounded-lg",
+                    "px-3",
+                    "py-2",
+                    "text-center",
+                    "text-sm",
+                    "font-medium",
+                    "data-[state=active]:bg-sidebar-accent",
+                    "sm:w-full",
+                    "sm:justify-start",
+                    "sm:text-left"
+                  )}
                   value="theme"
                 >
                   Theme
                 </TabsTrigger>
                 <TabsTrigger
-                  className="w-full justify-start rounded-lg px-3 py-2 text-left font-medium text-sm data-[state=active]:bg-sidebar-accent"
+                  className={cn(
+                    "flex-1",
+                    "whitespace-nowrap",
+                    "rounded-lg",
+                    "px-3",
+                    "py-2",
+                    "text-center",
+                    "text-sm",
+                    "font-medium",
+                    "data-[state=active]:bg-sidebar-accent",
+                    "sm:w-full",
+                    "sm:justify-start",
+                    "sm:text-left"
+                  )}
                   value="portfolio"
                 >
                   Portfolio
                 </TabsTrigger>
                 <TabsTrigger
-                  className="w-full justify-start rounded-lg px-3 py-2 text-left font-medium text-sm data-[state=active]:bg-sidebar-accent"
+                  className={cn(
+                    "flex-1",
+                    "whitespace-nowrap",
+                    "rounded-lg",
+                    "px-3",
+                    "py-2",
+                    "text-center",
+                    "text-sm",
+                    "font-medium",
+                    "data-[state=active]:bg-sidebar-accent",
+                    "sm:w-full",
+                    "sm:justify-start",
+                    "sm:text-left"
+                  )}
                   value="assistant"
                 >
                   Assistant
                 </TabsTrigger>
                 <TabsTrigger
-                  className="w-full justify-start rounded-lg px-3 py-2 text-left font-medium text-sm data-[state=active]:bg-sidebar-accent"
+                  className={cn(
+                    "flex-1",
+                    "whitespace-nowrap",
+                    "rounded-lg",
+                    "px-3",
+                    "py-2",
+                    "text-center",
+                    "text-sm",
+                    "font-medium",
+                    "data-[state=active]:bg-sidebar-accent",
+                    "sm:w-full",
+                    "sm:justify-start",
+                    "sm:text-left"
+                  )}
                   value="danger"
                 >
                   Reset or Transfer
                 </TabsTrigger>
               </TabsList>
             </div>
-            <div className="flex flex-1 flex-col rounded-2xl px-4">
-              <TabsContent className="space-y-2" value="account">
+            <div
+              className={cn(
+                "flex",
+                "min-h-0",
+                "flex-1",
+                "flex-col",
+                "overflow-hidden",
+                "rounded-2xl",
+                "px-4"
+              )}
+            >
+              <TabsContent
+                className={cn(
+                  "flex",
+                  "flex-1",
+                  "flex-col",
+                  "space-y-2",
+                  "overflow-y-auto"
+                )}
+                value="account"
+              >
                 {isAnonymousUser ? (
                   <div
                     className={cn(
@@ -812,7 +930,16 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
                   </>
                 )}
               </TabsContent>
-              <TabsContent className="space-y-2" value="theme">
+              <TabsContent
+                className={cn(
+                  "flex",
+                  "flex-1",
+                  "flex-col",
+                  "space-y-2",
+                  "overflow-y-auto"
+                )}
+                value="theme"
+              >
                 <div className="space-y-2">
                   <PreferenceRow
                     description="Switch between light, dark, or follow your system."
@@ -851,8 +978,17 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
                   </PreferenceRow>
                 </div>
               </TabsContent>
-              <TabsContent className="space-y-2" value="portfolio">
-                <div className="space-y-2">
+              <TabsContent
+                className={cn(
+                  "flex",
+                  "flex-1",
+                  "flex-col",
+                  "space-y-2",
+                  "overflow-y-auto"
+                )}
+                value="portfolio"
+              >
+                <div className="h-[calc(85vh-220px)] space-y-2 overflow-y-auto">
                   <PreferenceRow
                     description="Sets the primary currency for your aggregated portfolio values."
                     title="Display currency"
@@ -1078,7 +1214,16 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
                   </PreferenceRow>
                 </div>
               </TabsContent>
-              <TabsContent className="space-y-2" value="assistant">
+              <TabsContent
+                className={cn(
+                  "flex",
+                  "flex-1",
+                  "flex-col",
+                  "space-y-2",
+                  "overflow-y-auto"
+                )}
+                value="assistant"
+              >
                 <div className="space-y-2">
                   <PreferenceRow
                     description="Pre-instructions apply to every chat, and investment style helps us tune the assistant."
@@ -1121,7 +1266,16 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
                   </PreferenceRow>
                 </div>
               </TabsContent>
-              <TabsContent className="space-y-6" value="danger">
+              <TabsContent
+                className={cn(
+                  "flex",
+                  "flex-1",
+                  "flex-col",
+                  "space-y-6",
+                  "overflow-y-auto"
+                )}
+                value="danger"
+              >
                 <PreferenceRow
                   description="Removes every chat history item. This cannot be undone."
                   title="Delete all chats"
