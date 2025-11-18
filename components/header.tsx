@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import { SciQntIcon } from "@/components/icons";
 import { SidebarToggle } from "@/components/sidebar-toggle";
 
 function AppHeaderComponent() {
