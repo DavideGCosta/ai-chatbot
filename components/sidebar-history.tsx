@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import useSWRInfinite from "swr/infinite";
+import { toast } from "@/components/toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +25,6 @@ import {
 import type { AppUser } from "@/lib/auth/session";
 import type { Chat } from "@/lib/db/schema";
 import { fetcher } from "@/lib/utils";
-import { toast } from "@/components/toast";
 import { LoaderIcon } from "./icons";
 import { ChatItem } from "./sidebar-history-item";
 
@@ -112,13 +112,13 @@ export function SidebarHistory({ user }: { user: AppUser | undefined }) {
   });
 
   useEffect(() => {
-    if (!user) {
+    if (user) {
+      mutate();
+    } else {
       setSize(0);
       mutate([], false);
-    } else {
-      mutate();
     }
-  }, [user?.id, mutate, setSize]);
+  }, [user, mutate, setSize]);
 
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);

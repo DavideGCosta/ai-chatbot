@@ -1,10 +1,10 @@
 import { tool, type UIMessageStreamWriter } from "ai";
 import { z } from "zod";
-import type { AppSession } from "@/lib/auth/session";
 import {
   artifactKinds,
   documentHandlersByArtifactKind,
 } from "@/lib/artifacts/server";
+import type { AppSession } from "@/lib/auth/session";
 import type { ChatMessage } from "@/lib/types";
 import { generateUUID } from "@/lib/utils";
 

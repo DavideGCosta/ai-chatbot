@@ -92,9 +92,29 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
 
   const handleDeleteAll = () => {
-    const deletePromise = fetch("/api/history", {
-      method: "DELETE",
-    });
+    const deletePromise = (async () => {
+      const response = await fetch("/api/history", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => ({}))) as {
+          error?: string;
+          message?: string;
+        };
+        const derivedMessage =
+          (typeof payload.error === "string" && payload.error.length > 0
+            ? payload.error
+            : undefined) ??
+          (typeof payload.message === "string" && payload.message.length > 0
+            ? payload.message
+            : undefined) ??
+          "Failed to delete all chats.";
+        throw new Error(derivedMessage);
+      }
+
+      return response;
+    })();
 
     toast.promise(deletePromise, {
       loading: "Deleting all chats...",
@@ -104,7 +124,8 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
         setShowDeleteAllDialog(false);
         return "All chats deleted successfully";
       },
-      error: "Failed to delete all chats",
+      error: (error) =>
+        error instanceof Error ? error.message : "Failed to delete all chats",
     });
   };
 

@@ -25,9 +25,9 @@ const TooltipContent = React.forwardRef<
     {...props}
   >
     <LiquidGlass
-      border-radius="10px"
       className="px-2.5 py-1.5 font-medium text-xs"
       elevation="md"
+      rounded="lg"
     >
       {children}
     </LiquidGlass>

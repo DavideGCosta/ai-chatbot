@@ -1,4 +1,3 @@
-import { toast } from "@/components/toast";
 import { Artifact } from "@/components/create-artifact";
 import { DiffView } from "@/components/diffview";
 import { DocumentSkeleton } from "@/components/document-skeleton";
@@ -11,6 +10,7 @@ import {
   UndoIcon,
 } from "@/components/icons";
 import { Editor } from "@/components/text-editor";
+import { toast } from "@/components/toast";
 import type { Suggestion } from "@/lib/db/schema";
 import { getSuggestions } from "../actions";
 

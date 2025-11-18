@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { getSession } from "@/lib/auth/session";
-import { getChatsByUserId, deleteAllChatsByUserId } from "@/lib/db/queries";
+import { deleteAllChatsByUserId, getChatsByUserId } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 
 export async function GET(request: NextRequest) {

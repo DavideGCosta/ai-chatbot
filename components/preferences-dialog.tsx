@@ -11,6 +11,9 @@ import {
   useRef,
   useState,
 } from "react";
+import { useSWRConfig } from "swr";
+import { unstable_serialize } from "swr/infinite";
+import { getChatHistoryPaginationKey } from "@/components/sidebar-history";
 import { useSupabase } from "@/components/supabase-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,6 +67,7 @@ function deriveDisplayNameFromEmail(value: string) {
 export function PreferencesDialog(props: PreferencesDialogProps) {
   const { open, onOpenChange } = props;
   const router = useRouter();
+  const { mutate } = useSWRConfig();
   const { supabase } = useSupabase();
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [preferences, setPreferences] =
@@ -71,7 +75,6 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
   const [initialPreferences, setInitialPreferences] =
     useState<UserPreferences>(DEFAULT_PREFERENCES);
   const [status, setStatus] = useState<"idle" | "loading" | "saving">("idle");
-  const [, setError] = useState<string | null>(null);
   const [isDeletingChats, setIsDeletingChats] = useState(false);
   const [activeTab, setActiveTab] = useState("account");
   const [accountEmail, setAccountEmail] = useState("");
@@ -139,7 +142,6 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
 
     let isCancelled = false;
     setStatus("loading");
-    setError(null);
 
     const loadPreferences = async () => {
       try {
@@ -173,7 +175,10 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
           loadError instanceof Error
             ? loadError.message
             : "Unable to load preferences.";
-        setError(message);
+        toast({
+          type: "error",
+          description: message,
+        });
       } finally {
         if (!isCancelled) {
           setStatus("idle");
@@ -289,7 +294,6 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
 
   const handleSave = async () => {
     setStatus("saving");
-    setError(null);
 
     try {
       const trimmedDisplayNameInput = displayName.trim();
@@ -426,7 +430,6 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
         saveError instanceof Error
           ? saveError.message
           : "Unable to save preferences.";
-      setError(message);
       toast({
         type: "error",
         description: message,
@@ -442,7 +445,6 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
     setDisplayName(initialDisplayName);
     setNewPassword("");
     setConfirmPassword("");
-    setError(null);
   };
 
   const handleDeleteAllChats = async () => {
@@ -453,6 +455,9 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
         const payload = await response.json().catch(() => ({}));
         throw new Error(payload.error ?? "Failed to delete chats.");
       }
+
+      await mutate(unstable_serialize(getChatHistoryPaginationKey));
+      router.refresh();
 
       toast({
         type: "success",
@@ -563,7 +568,6 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
     }
 
     setIsDeletingAccount(true);
-    setError(null);
 
     try {
       const response = await fetch("/api/account", { method: "DELETE" });
@@ -588,7 +592,6 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
         deleteError instanceof Error
           ? deleteError.message
           : "Unable to delete account.";
-      setError(message);
       toast({
         type: "error",
         description: message,

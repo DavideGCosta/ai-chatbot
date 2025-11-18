@@ -28,15 +28,17 @@ const toAppUser = (user: User): AppUser => {
     typeof user.user_metadata?.avatar_url === "string"
       ? user.user_metadata.avatar_url
       : null;
-  const fallbackDisplayName =
-    user.email && user.email.includes("@")
-      ? user.email.split("@")[0] ?? null
-      : null;
+  const fallbackDisplayName = user.email?.includes("@")
+    ? (user.email.split("@")[0] ?? null)
+    : null;
 
   return {
     id: user.id,
     email: user.email ?? null,
-    displayName: metadataDisplayName.length > 0 ? metadataDisplayName : fallbackDisplayName,
+    displayName:
+      metadataDisplayName.length > 0
+        ? metadataDisplayName
+        : fallbackDisplayName,
     avatarUrl: metadataAvatarUrl,
     isAnonymous,
     type: isAnonymous ? "guest" : "regular",
