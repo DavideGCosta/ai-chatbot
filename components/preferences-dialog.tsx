@@ -981,14 +981,23 @@ export function PreferencesDialog(props: PreferencesDialogProps) {
               <TabsContent
                 className={cn(
                   "flex",
+                  "min-h-0",
                   "flex-1",
                   "flex-col",
-                  "space-y-2",
-                  "overflow-y-auto"
+                  "overflow-hidden"
                 )}
                 value="portfolio"
               >
-                <div className="h-[calc(85vh-220px)] space-y-2 overflow-y-auto">
+                <div
+                  className={cn(
+                    "flex",
+                    "min-h-0",
+                    "flex-1",
+                    "flex-col",
+                    "space-y-2",
+                    "overflow-y-auto"
+                  )}
+                >
                   <PreferenceRow
                     description="Sets the primary currency for your aggregated portfolio values."
                     title="Display currency"
