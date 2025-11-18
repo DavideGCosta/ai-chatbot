@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { AppToaster } from "@/components/ui/app-toaster";
-import { ThemeProvider } from "@/components/theme-provider";
 import { SupabaseSessionListener } from "@/components/supabase-listener";
 import { SupabaseProvider } from "@/components/supabase-provider";
+import { ThemeProvider } from "@/components/theme-provider";
+import { AppToaster } from "@/components/ui/app-toaster";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://sciqnt.com"), // Update if there's a domain
   title: "SciQnt - Financial Markets AI Assistant",
-  description: "AI-powered chatbot for financial analysis, portfolio management, and market insights.",
+  description:
+    "AI-powered chatbot for financial analysis, portfolio management, and market insights.",
 };
 
 export const viewport = {
@@ -73,9 +74,6 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        {/* SVG filters for liquid-glass distortion (container + buttons)
-            Based on: https://github.com/lucasromerodb/liquid-glass-effect-macos
-        */}
         <svg
           aria-hidden="true"
           height="0"
@@ -84,11 +82,11 @@ export default function RootLayout({
         >
           <defs>
             <filter
+              height="100%"
               id="container-glass"
+              width="100%"
               x="0%"
               y="0%"
-              width="100%"
-              height="100%"
             >
               <feTurbulence
                 baseFrequency="0.008 0.008"
@@ -106,13 +104,7 @@ export default function RootLayout({
                 yChannelSelector="G"
               />
             </filter>
-            <filter
-              id="btn-glass"
-              x="0%"
-              y="0%"
-              width="100%"
-              height="100%"
-            >
+            <filter height="100%" id="btn-glass" width="100%" x="0%" y="0%">
               <feTurbulence
                 baseFrequency="0.008 0.008"
                 numOctaves="2"
