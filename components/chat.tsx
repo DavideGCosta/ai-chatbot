@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
-import { ChatHeader } from "@/components/chat-header";
+import { AppHeader } from "@/components/chat-header";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -159,11 +159,7 @@ export function Chat({
   return (
     <>
       <div className="overscroll-behavior-contain flex h-dvh min-w-0 touch-pan-y flex-col bg-background">
-        <ChatHeader
-          chatId={id}
-          isReadonly={isReadonly}
-          selectedVisibilityType={initialVisibilityType}
-        />
+        <AppHeader />
 
         <Messages
           chatId={id}
