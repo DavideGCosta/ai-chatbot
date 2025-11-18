@@ -372,9 +372,11 @@
 
 /* Base liquid glass surface with subtle highlight overlay */
 .liquid-glass {
-  background: color-mix(in oklab, white 50%, transparent);
-  border-color: color-mix(in oklab, white 25%, transparent);
+  background: color-mix(in oklab, white 75%, rgba(255, 255, 255, 0.65));
+  border-color: color-mix(in oklab, white 45%, transparent);
   position: relative;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 }
 .liquid-glass::before {
   content: "";
@@ -392,8 +394,10 @@
   pointer-events: none;
 }
 .dark .liquid-glass {
-  background: color-mix(in oklab, #0a0a0a 80%, transparent);
-  border-color: color-mix(in oklab, white 10%, transparent);
+  background: color-mix(in oklab, #050505 90%, rgba(0, 0, 0, 0.45));
+  border-color: color-mix(in oklab, white 20%, transparent);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 }
 .dark .liquid-glass::before {
   background:
