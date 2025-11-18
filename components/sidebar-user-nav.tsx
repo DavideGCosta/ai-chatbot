@@ -28,7 +28,13 @@ import { useSupabase } from "./supabase-provider";
 import { toast } from "./toast";
 import { useSidebar } from "./ui/sidebar";
 
-export function SidebarUserNav({ user }: { user: AppUser }) {
+export function SidebarUserNav({
+  user,
+  variant = "inline",
+}: {
+  user: AppUser;
+  variant?: "inline" | "icon";
+}) {
   const router = useRouter();
   const { supabase } = useSupabase();
   const { setTheme, resolvedTheme, theme } = useTheme();
@@ -101,17 +107,19 @@ export function SidebarUserNav({ user }: { user: AppUser }) {
                   imageUrl={user.avatarUrl}
                   size={avatarSize}
                 />
-                <div className="flex min-w-0 flex-1 flex-col leading-tight group-data-[collapsible=icon]:hidden">
-                  <span
-                    className="truncate font-medium text-sm"
-                    data-testid="user-email"
-                  >
-                    {isGuest ? "Guest" : displayEmail}
-                  </span>
-                  <span className="text-muted-foreground text-xs">
-                    {membershipLabel}
-                  </span>
-                </div>
+                {variant !== "icon" && (
+                  <div className="flex min-w-0 flex-1 flex-col leading-tight group-data-[collapsible=icon]:hidden">
+                    <span
+                      className="truncate font-medium text-sm"
+                      data-testid="user-email"
+                    >
+                      {isGuest ? "Guest" : displayEmail}
+                    </span>
+                    <span className="text-muted-foreground text-xs">
+                      {membershipLabel}
+                    </span>
+                  </div>
+                )}
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent

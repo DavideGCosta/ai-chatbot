@@ -154,7 +154,7 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
         }}
         variant="floating"
       >
-        <SidebarHeader className="px-1 py-1">
+        <SidebarHeader className="px-1 py-0">
           <SidebarMenu>
             {/* Panel 1: Brand + toggle */}
             <div
