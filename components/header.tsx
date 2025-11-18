@@ -58,7 +58,7 @@ function AppHeaderComponent({ user }: AppHeaderProps) {
         ) : (
           <div className="flex items-center gap-2">
             <Button asChild size="sm" variant="ghost">
-              <Link href="/signup">Sign Up</Link>
+              <Link href="/register">Sign Up</Link>
             </Button>
             <Button asChild size="sm" variant="default">
               <Link href="/login">Log In</Link>
