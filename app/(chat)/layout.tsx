@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import Script from "next/script";
 import { AppSidebar } from "@/components/app-sidebar";
 import { DataStreamProvider } from "@/components/data-stream-provider";
+import { AppHeader } from "@/components/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getSession } from "@/lib/auth/session";
 
@@ -24,7 +25,14 @@ export default async function Layout({
       <DataStreamProvider>
         <SidebarProvider defaultOpen={!isCollapsed}>
           <AppSidebar user={session?.user} />
-          <SidebarInset>{children}</SidebarInset>
+          <SidebarInset>
+            <div className="flex h-dvh min-h-0 flex-1 flex-col bg-background">
+              <AppHeader />
+              <main className="flex flex-1 flex-col overflow-hidden">
+                {children}
+              </main>
+            </div>
+          </SidebarInset>
         </SidebarProvider>
       </DataStreamProvider>
     </>
