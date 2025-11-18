@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
 import { SupabaseSessionListener } from "@/components/supabase-listener";
 import { SupabaseProvider } from "@/components/supabase-provider";
+import { ThemeProvider } from "@/components/theme-provider";
+import { AppToaster } from "@/components/ui/app-toaster";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://chat.vercel.ai"),
-  title: "Next.js Chatbot Template",
-  description: "Next.js chatbot template using the AI SDK.",
+  metadataBase: new URL("https://sciqnt.com"), // Update if there's a domain
+  title: "SciQnt - Financial Markets AI Assistant",
+  description:
+    "AI-powered chatbot for financial analysis, portfolio management, and market insights.",
 };
 
 export const viewport = {
@@ -73,6 +74,55 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        <svg
+          aria-hidden="true"
+          height="0"
+          style={{ position: "absolute" }}
+          width="0"
+        >
+          <defs>
+            <filter
+              height="100%"
+              id="container-glass"
+              width="100%"
+              x="0%"
+              y="0%"
+            >
+              <feTurbulence
+                baseFrequency="0.008 0.008"
+                numOctaves="2"
+                result="noise"
+                seed="92"
+                type="fractalNoise"
+              />
+              <feGaussianBlur in="noise" result="blur" stdDeviation="0.02" />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="blur"
+                scale="77"
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+            <filter height="100%" id="btn-glass" width="100%" x="0%" y="0%">
+              <feTurbulence
+                baseFrequency="0.008 0.008"
+                numOctaves="2"
+                result="noise"
+                seed="92"
+                type="fractalNoise"
+              />
+              <feGaussianBlur in="noise" result="blur" stdDeviation="0.02" />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="blur"
+                scale="40"
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+          </defs>
+        </svg>
         <SupabaseProvider>
           <SupabaseSessionListener />
           <ThemeProvider
@@ -81,7 +131,7 @@ export default function RootLayout({
             disableTransitionOnChange
             enableSystem
           >
-            <Toaster position="top-center" />
+            <AppToaster />
             {children}
           </ThemeProvider>
         </SupabaseProvider>

@@ -6,6 +6,8 @@ export type UserType = "guest" | "regular";
 export type AppUser = {
   id: string;
   email: string | null;
+  displayName: string | null;
+  avatarUrl: string | null;
   isAnonymous: boolean;
   type: UserType;
 };
@@ -18,10 +20,26 @@ const toAppUser = (user: User): AppUser => {
   const isAnonymous = Boolean(
     user.is_anonymous ?? user.app_metadata?.provider === "anonymous"
   );
+  const metadataDisplayName =
+    typeof user.user_metadata?.display_name === "string"
+      ? user.user_metadata.display_name.trim()
+      : "";
+  const metadataAvatarUrl =
+    typeof user.user_metadata?.avatar_url === "string"
+      ? user.user_metadata.avatar_url
+      : null;
+  const fallbackDisplayName = user.email?.includes("@")
+    ? (user.email.split("@")[0] ?? null)
+    : null;
 
   return {
     id: user.id,
     email: user.email ?? null,
+    displayName:
+      metadataDisplayName.length > 0
+        ? metadataDisplayName
+        : fallbackDisplayName,
+    avatarUrl: metadataAvatarUrl,
     isAnonymous,
     type: isAnonymous ? "guest" : "regular",
   };

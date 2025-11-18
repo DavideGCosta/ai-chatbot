@@ -4,8 +4,8 @@ import { isToday, isYesterday, subMonths, subWeeks } from "date-fns";
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import useSWRInfinite from "swr/infinite";
+import { toast } from "@/components/toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -112,13 +112,13 @@ export function SidebarHistory({ user }: { user: AppUser | undefined }) {
   });
 
   useEffect(() => {
-    if (!user) {
+    if (user) {
+      mutate();
+    } else {
       setSize(0);
       mutate([], false);
-    } else {
-      mutate();
     }
-  }, [user?.id, mutate, setSize]);
+  }, [user, mutate, setSize]);
 
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);

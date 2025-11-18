@@ -1,8 +1,8 @@
 "use client";
 
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useSupabase } from "./supabase-provider";
 
 export function SupabaseSessionListener() {

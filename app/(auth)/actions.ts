@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 
+import { DEFAULT_PREFERENCES } from "@/lib/preferences";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const authFormSchema = z.object({
@@ -66,9 +67,19 @@ export const register = async (
       password: formData.get("password"),
     });
 
+    const defaultDisplayName = validatedData.email.includes("@")
+      ? (validatedData.email.split("@")[0] ?? validatedData.email)
+      : validatedData.email;
+
     const { error } = await supabase.auth.signUp({
       email: validatedData.email,
       password: validatedData.password,
+      options: {
+        data: {
+          preferences: DEFAULT_PREFERENCES,
+          display_name: defaultDisplayName,
+        },
+      },
     });
 
     if (error) {

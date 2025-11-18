@@ -1,10 +1,9 @@
 @import "tailwindcss";
+/* Add KaTeX CSS for math rendering */
+@import "katex/dist/katex.min.css";
 
 /* include utility classes in streamdown */
 @source '../node_modules/streamdown/dist/index.js';
-
-/* Add KaTeX CSS for math rendering */
-@import 'katex/dist/katex.min.css';
 
 /* custom variant for setting dark mode programmatically */
 @custom-variant dark (&:is(.dark, .dark *));
@@ -317,4 +316,107 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Liquid glass treatment for floating sidebar container */
+/* Use granular glass panels instead of full-surface glass */
+.glass-panel {
+  backdrop-filter: blur(18px);
+  background: color-mix(in oklab, white 35%, transparent);
+  border: 1px solid color-mix(in oklab, white 25%, transparent);
+  border-radius: 12px;
+}
+.dark .glass-panel {
+  backdrop-filter: blur(18px);
+  background: color-mix(in oklab, #0a0a0a 35%, transparent);
+  border-color: color-mix(in oklab, white 10%, transparent);
+}
+
+/* Ensure the shadcn sidebar surface is transparent; apply per-panel glass instead */
+.sidebar-no-surface [data-sidebar="sidebar"] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+@keyframes sidebar-ink-wash {
+  0% {
+    background-position: -130% center;
+    color: color-mix(in oklab, var(--sidebar-ring) 20%, transparent);
+  }
+  100% {
+    background-position: 130% center;
+    color: var(--sidebar-ring);
+  }
+}
+
+.sidebar-ink {
+  background-image: linear-gradient(
+    120deg,
+    color-mix(in oklab, var(--sidebar-ring) 20%, transparent),
+    var(--sidebar-ring),
+    color-mix(in oklab, var(--sidebar-ring) 20%, transparent)
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: inherit;
+  transition: color 0.15s ease;
+}
+
+.sidebar-ink-parent:hover .sidebar-ink,
+.sidebar-ink-parent:focus-visible .sidebar-ink {
+  color: transparent;
+  animation: sidebar-ink-wash 0.45s ease forwards;
+}
+
+/* Base liquid glass surface with subtle highlight overlay */
+.liquid-glass {
+  background: color-mix(in oklab, white 50%, transparent);
+  border-color: color-mix(in oklab, white 25%, transparent);
+  position: relative;
+}
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background:
+    radial-gradient(
+      120% 100% at 0% 0%,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(255, 255, 255, 0.06) 35%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+.dark .liquid-glass {
+  background: color-mix(in oklab, #0a0a0a 80%, transparent);
+  border-color: color-mix(in oklab, white 10%, transparent);
+}
+.dark .liquid-glass::before {
+  background:
+    radial-gradient(
+      120% 100% at 0% 0%,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.04) 35%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+}
+
+.liquid-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* Distortion layer: use SVG filter for strong liquid-glass effect */
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  -webkit-filter: url(#container-glass);
+  filter: url(#container-glass);
+  overflow: hidden;
+  isolation: isolate;
+  z-index: -1;
 }
