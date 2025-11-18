@@ -46,6 +46,33 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
   const router = useRouter();
   const { setOpenMobile, state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const disabledNavButtonClasses = [
+    "group",
+    "sidebar-ink-parent",
+    "group/sidebar-item",
+    "cursor-not-allowed",
+    "rounded-lg",
+    "border",
+    "border-transparent",
+    "text-sidebar-accent-foreground",
+    "opacity-60",
+  ].join(" ");
+  const comingSoonBadgeClasses = [
+    "ml-auto",
+    "rounded-full",
+    "border",
+    "border-dashed",
+    "border-sky-400/40",
+    "bg-sky-400/10",
+    "px-2",
+    "py-0.5",
+    "text-[10px]",
+    "font-semibold",
+    "uppercase",
+    "tracking-wide",
+    "text-sky-200",
+    "group-data-[collapsible=icon]:hidden",
+  ].join(" ");
 
   const withCollapsedTooltip = (label: string, node: React.ReactNode) => {
     if (!isCollapsed) {
@@ -164,92 +191,89 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                 ].join(" ")}
               >
                 {withCollapsedTooltip(
-                  "Markets",
+                  "Markets — Coming soon",
                   <SidebarMenuButton
-                    asChild
-                    className={[
-                      "cursor-pointer",
-                      "rounded-lg",
-                      "text-sidebar-accent-foreground",
-                    ].join(" ")}
+                    className={disabledNavButtonClasses}
+                    disabled
                   >
-                    <Link
-                      href="/markets"
-                      onClick={() => {
-                        setOpenMobile(false);
-                      }}
-                    >
-                      <MarketsIcon />
+                    <div className="flex w-full items-center gap-2">
+                      <span className="text-sidebar-accent-foreground">
+                        <span className="sidebar-ink">
+                          <MarketsIcon />
+                        </span>
+                      </span>
                       <span
                         className={[
                           "font-normal",
                           "group-data-[collapsible=icon]:hidden",
                           "text-sm",
+                          "sidebar-ink",
                         ].join(" ")}
                       >
                         Markets
                       </span>
-                    </Link>
+                      <span className={comingSoonBadgeClasses}>
+                        Coming Soon
+                      </span>
+                    </div>
                   </SidebarMenuButton>
                 )}
 
                 {withCollapsedTooltip(
-                  "Portfolio",
+                  "Portfolio — Coming soon",
                   <SidebarMenuButton
-                    asChild
-                    className={[
-                      "cursor-pointer",
-                      "rounded-lg",
-                      "text-sidebar-accent-foreground",
-                    ].join(" ")}
+                    className={disabledNavButtonClasses}
+                    disabled
                   >
-                    <Link
-                      href="/portfolio"
-                      onClick={() => {
-                        setOpenMobile(false);
-                      }}
-                    >
-                      <PortfolioIcon />
+                    <div className="flex w-full items-center gap-2">
+                      <span className="text-sidebar-accent-foreground">
+                        <span className="sidebar-ink">
+                          <PortfolioIcon />
+                        </span>
+                      </span>
                       <span
                         className={[
                           "font-normal",
                           "group-data-[collapsible=icon]:hidden",
                           "text-sm",
+                          "sidebar-ink",
                         ].join(" ")}
                       >
                         Portfolio
                       </span>
-                    </Link>
+                      <span className={comingSoonBadgeClasses}>
+                        Coming Soon
+                      </span>
+                    </div>
                   </SidebarMenuButton>
                 )}
 
                 {withCollapsedTooltip(
-                  "Spaces",
+                  "Spaces — Coming soon",
                   <SidebarMenuButton
-                    asChild
-                    className={[
-                      "cursor-pointer",
-                      "rounded-lg",
-                      "text-sidebar-accent-foreground",
-                    ].join(" ")}
+                    className={disabledNavButtonClasses}
+                    disabled
                   >
-                    <Link
-                      href="/spaces"
-                      onClick={() => {
-                        setOpenMobile(false);
-                      }}
-                    >
-                      <SpacesIcon />
+                    <div className="flex w-full items-center gap-2">
+                      <span className="text-sidebar-accent-foreground">
+                        <span className="sidebar-ink">
+                          <SpacesIcon />
+                        </span>
+                      </span>
                       <span
                         className={[
                           "font-normal",
                           "group-data-[collapsible=icon]:hidden",
                           "text-sm",
+                          "sidebar-ink",
                         ].join(" ")}
                       >
                         Spaces
                       </span>
-                    </Link>
+                      <span className={comingSoonBadgeClasses}>
+                        Coming Soon
+                      </span>
+                    </div>
                   </SidebarMenuButton>
                 )}
               </div>
@@ -276,10 +300,14 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                 <SidebarMenuButton
                   asChild
                   className={[
+                    "group",
+                    "sidebar-ink-parent",
+                    "group/sidebar-item",
                     "cursor-pointer",
                     "justify-between",
                     "text-sidebar-accent-foreground",
-                    "rounded-lg",
+                    "rounded-lg border border-transparent",
+                    "transition-none hover:border-transparent hover:bg-transparent focus-visible:outline-none focus-visible:ring-0",
                   ].join(" ")}
                 >
                   <Link
@@ -291,13 +319,18 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                     <div
                       className={["flex", "flex-row", "items-center"].join(" ")}
                     >
-                      <MessageIcon />
+                      <span className="text-sidebar-accent-foreground transition-colors duration-200 group-hover/sidebar-item:text-sky-300">
+                        <span className="sidebar-ink">
+                          <MessageIcon />
+                        </span>
+                      </span>
                       <span
                         className={[
                           "font-normal",
                           "pl-3.5",
                           "text-sm",
                           "group-data-[collapsible=icon]:hidden",
+                          "sidebar-ink",
                         ].join(" ")}
                       >
                         Chats

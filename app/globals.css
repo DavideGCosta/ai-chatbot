@@ -340,6 +340,37 @@
   box-shadow: none !important;
 }
 
+@keyframes sidebar-ink-wash {
+  0% {
+    background-position: -130% center;
+    color: rgba(14, 165, 233, 0.2);
+  }
+  100% {
+    background-position: 130% center;
+    color: rgba(14, 165, 233, 1);
+  }
+}
+
+.sidebar-ink {
+  background-image: linear-gradient(
+    120deg,
+    rgba(14, 165, 233, 0.15),
+    rgba(14, 165, 233, 0.8),
+    rgba(14, 165, 233, 0.15)
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: inherit;
+  transition: color 0.15s ease;
+}
+
+.sidebar-ink-parent:hover .sidebar-ink,
+.sidebar-ink-parent:focus-visible .sidebar-ink {
+  color: transparent;
+  animation: sidebar-ink-wash 0.45s ease forwards;
+}
+
 /* Base liquid glass surface with subtle highlight overlay */
 .liquid-glass {
   background: color-mix(in oklab, white 50%, transparent);
