@@ -28,4 +28,3 @@ For production deployment, configure your hosting provider accordingly.
 2. Rewrote every database query (`lib/db/queries.ts`) to call Supabase directly and introduced schema typings under `lib/db/schema.ts`.
 3. Added Supabase-aware middleware and providers so server routes, layouts, and components (sidebar, history APIs, file uploads, etc.) enforce the new auth model.
 4. Cleaned up tooling by removing Drizzle migrations/scripts and updating `package.json` to pull in `@supabase/supabase-js` + `@supabase/ssr`.
-s
