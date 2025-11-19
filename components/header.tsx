@@ -31,7 +31,7 @@ function AppHeaderComponent({ user }: AppHeaderProps) {
         "z-50",
       ].join(" ")}
     >
-      <div className="mt-1 flex h-fit flex-1 items-center gap-3">
+      <div className="mt-1 flex h-[26px] flex-1 items-center gap-3">
         <Link
           aria-label="Go to SciQnt home"
           className="flex items-center gap-2 rounded-xl px-2 py-1 text-foreground md:hidden"
@@ -50,7 +50,7 @@ function AppHeaderComponent({ user }: AppHeaderProps) {
         </Link>
         <SidebarToggle className="hidden md:flex" />
       </div>
-      <div className="flex h-fit flex-1 items-center justify-end">
+      <div className="flex flex-1 items-center justify-end">
         {authenticatedUser ? (
           <div className="max-w-[260px] sm:max-w-sm md:hidden">
             <SidebarUserNav user={authenticatedUser} variant="icon" />
