@@ -28,6 +28,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
     "next.config.js"
   ],
   "exclude": ["node_modules", "temp_upstream", "tests", "old_project"]
