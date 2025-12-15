@@ -87,3 +87,10 @@ export const modelsByProvider = chatModels.reduce(
   },
   {} as Record<string, ChatModel[]>
 );
+
+export function getSafeChatModelId(modelId: string | undefined | null) {
+  if (!modelId) return DEFAULT_CHAT_MODEL;
+  return chatModels.find((m) => m.id === modelId)
+    ? modelId
+    : DEFAULT_CHAT_MODEL;
+}

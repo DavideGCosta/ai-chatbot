@@ -204,12 +204,6 @@ function PureMultimodalInput({
     }
   }, []);
 
-  const safeSelectedModelId = getSafeChatModelId(selectedModelId);
-
-  const _modelResolver = useMemo(() => {
-    return myProvider.languageModel(safeSelectedModelId);
-  }, [safeSelectedModelId]);
-
   const contextProps = useMemo(
     () => ({
       usage,
@@ -390,12 +384,12 @@ function PureMultimodalInput({
           <PromptInputTools className="gap-0 sm:gap-0.5">
             <AttachmentsButton
               fileInputRef={fileInputRef}
-              selectedModelId={safeSelectedModelId}
+              selectedModelId={selectedModelId}
               status={status}
             />
             <ModelSelectorCompact
               onModelChange={onModelChange}
-              selectedModelId={safeSelectedModelId}
+              selectedModelId={selectedModelId}
             />
           </PromptInputTools>
 
