@@ -7,6 +7,8 @@ import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getSession } from "@/lib/auth/session";
 
+export const experimental_ppr = true;
+
 export default async function Layout({
   children,
 }: {
