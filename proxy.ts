@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { createSupabaseMiddlewareClient } from "./lib/supabase/middleware";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/ping")) {
@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (error) {
-    console.warn("Failed to load Supabase user in middleware", error.message);
+    console.warn("Failed to load Supabase user in proxy", error.message);
   }
 
   if (!user) {
