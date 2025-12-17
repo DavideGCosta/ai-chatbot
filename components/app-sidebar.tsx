@@ -191,9 +191,10 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                   className={[
                     "font-medium",
                     "group-data-[collapsible=icon]:hidden",
-                    "text-md",
+                    "text-[17px]",
                     "text-logo",
                   ].join(" ")}
+                  style={{ fontFamily: '"SF Compact Text", sans-serif' }}
                 >
                   SciQnt
                 </span>
