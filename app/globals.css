@@ -46,6 +46,7 @@
   --sidebar-accent-foreground: hsl(240 5.9% 10%);
   --sidebar-border: hsl(220 13% 91%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --logo: hsl(240 10% 3.9%);
   /* border radius unit */
   --radius: 0.5rem;
   --sidebar: hsl(0 0% 98%);
@@ -86,6 +87,7 @@
   --sidebar-border: hsl(240 3.7% 15.9%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
   --sidebar: hsl(240 5.9% 10%);
+  --logo: #dedede;
 }
 
 /* define theme */
@@ -141,6 +143,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-logo: var(--logo);
 }
 
 /*

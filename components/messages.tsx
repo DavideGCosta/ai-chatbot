@@ -61,7 +61,7 @@ function PureMessages({
   return (
     <div className="relative flex-1">
       <div
-        className="absolute inset-0 overscroll-behavior-contain -webkit-overflow-scrolling-touch touch-pan-y overflow-y-scroll"
+        className="absolute w-full h-full overscroll-behavior-contain -webkit-overflow-scrolling-touch touch-pan-y overflow-y-scroll"
         ref={messagesContainerRef}
         style={{ overflowAnchor: "none" }}
       >

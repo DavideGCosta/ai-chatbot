@@ -163,6 +163,7 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                 "items-center",
                 "justify-between",
                 "mb-2",
+                "mt-2",
               ].join(" ")}
             >
               <Link
@@ -188,9 +189,10 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                 <SciQntIcon size={26} />
                 <span
                   className={[
-                    "font-light",
+                    "font-medium",
                     "group-data-[collapsible=icon]:hidden",
                     "text-md",
+                    "text-logo",
                   ].join(" ")}
                 >
                   SciQnt

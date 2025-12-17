@@ -223,8 +223,8 @@ function UserAvatar({
   const [hasError, setHasError] = useState(false);
   const initials = fallbackLabel.trim().slice(0, 2).toUpperCase() || "SC";
 
-  const dimension = size === "sm" ? 32 : 40;
-  const wrapperClass = size === "sm" ? "size-8" : "size-10";
+  const dimension = size === "sm" ? 32 : 30;
+  const wrapperClass = size === "sm" ? "size-8" : "size-[30px]";
 
   const shouldUseGeneratedAvatar = !imageUrl || hasError;
 

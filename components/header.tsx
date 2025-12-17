@@ -24,8 +24,6 @@ function AppHeaderComponent({ user }: AppHeaderProps) {
         "justify-between",
         "py-2",
         "px-2",
-        "md:pr-4",
-        "md:py-0",
         "sticky",
         "top-0",
         "z-50",
