@@ -342,8 +342,8 @@ export function SidebarHistory({ user }: { user: AppUser | undefined }) {
           />
 
           {hasReachedEnd ? (
-            <div className="mt-8 flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
-              You have reached the end of your chat history.
+            <div className="mt-6 flex flex-row justify-center gap-2 px-2 text-xs text-zinc-500">
+              End of your chat history.
             </div>
           ) : (
             <div className="mt-8 flex flex-row items-center gap-2 p-2 text-zinc-500 dark:text-zinc-400">

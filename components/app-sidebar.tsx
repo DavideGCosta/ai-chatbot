@@ -313,7 +313,6 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
               "mb-2",
               "flex",
               "flex-col",
-              "flex-1",
               "min-h-0",
               "group-data-[collapsible=icon]:flex-none",
             ].join(" ")}
