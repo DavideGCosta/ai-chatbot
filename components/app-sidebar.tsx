@@ -306,9 +306,19 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
 
         {/* Panel 3: Chats link + history */}
         <SidebarContent
-          className={["flex-1", "px-1.5", "overflow-auto"].join(" ")}
+          className={["flex-1", "px-1.5", "overflow-hidden"].join(" ")}
         >
-          <CardEffect className={["mb-2"].join(" ")} rounded="xl">
+          <CardEffect
+            className={[
+              "mb-2",
+              "flex",
+              "flex-col",
+              "flex-1",
+              "min-h-0",
+              "group-data-[collapsible=icon]:flex-none",
+            ].join(" ")}
+            rounded="xl"
+          >
             {withCollapsedTooltip(
               "Chats",
               <div
@@ -369,9 +379,12 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
               </div>
             )}
             <div
-              className={["mt-1", "group-data-[collapsible=icon]:hidden"].join(
-                " "
-              )}
+              className={[
+                "mt-1",
+                "group-data-[collapsible=icon]:hidden",
+                "flex-1",
+                "overflow-auto",
+              ].join(" ")}
             >
               <SidebarHistory user={user} />
             </div>

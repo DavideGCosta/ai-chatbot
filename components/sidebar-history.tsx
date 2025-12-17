@@ -228,7 +228,7 @@ export function SidebarHistory({ user }: { user: AppUser | undefined }) {
                 const groupedChats = groupChatsByDate(chatsFromHistory);
 
                 return (
-                  <div className="flex flex-col gap-6">
+                  <div className="flex flex-col gap-4">
                     {groupedChats.today.length > 0 && (
                       <div>
                         <div className="px-2 py-1 text-sidebar-foreground/50 text-xs">

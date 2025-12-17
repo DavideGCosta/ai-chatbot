@@ -49,7 +49,7 @@ export function SidebarUserNav({
       ? user.displayName.trim()
       : (displayEmail.split("@")[0] ?? "User");
   const displayName = isGuest ? "Guest" : derivedDisplayName;
-  const membershipLabel = isGuest ? "Guest" : "Member";
+  const membershipLabel = isGuest ? "Sign Up For Free" : "Member";
   const avatarSize = sidebarState === "collapsed" ? "sm" : "md";
 
   const activeTheme =
@@ -113,7 +113,7 @@ export function SidebarUserNav({
                       className="truncate font-medium text-sm"
                       data-testid="user-email"
                     >
-                      {isGuest ? "Guest" : displayEmail}
+                      {isGuest ? "Guest" : derivedDisplayName}
                     </span>
                     <span className="text-muted-foreground text-xs">
                       {membershipLabel}
