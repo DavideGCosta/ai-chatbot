@@ -2,7 +2,7 @@
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { toast as sonnerToast } from "sonner";
-import { LiquidGlass } from "@/components/ui/liquid-glass";
+import { CardEffect } from "@/components/ui/card-effect";
 import { cn } from "@/lib/utils";
 import {
   CheckCircleFillIcon,
@@ -130,7 +130,7 @@ function ToastContent(props: ToastContentProps) {
   const icon = iconByTone[tone];
 
   return (
-    <LiquidGlass
+    <CardEffect
       aria-atomic="true"
       aria-live={tone === "error" ? "assertive" : "polite"}
       className={cn(
@@ -186,7 +186,7 @@ function ToastContent(props: ToastContentProps) {
           {description}
         </div>
       </div>
-    </LiquidGlass>
+    </CardEffect>
   );
 }
 

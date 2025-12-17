@@ -2,7 +2,7 @@ import { Slot as SlotPrimitive } from "radix-ui";
 import { type ComponentProps, forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
-type LiquidGlassProps = {
+type CardEffectProps = {
   asChild?: boolean;
   className?: string;
   elevation?: "sm" | "md" | "lg";
@@ -11,7 +11,7 @@ type LiquidGlassProps = {
 } & ComponentProps<"div">;
 
 const roundedToClass: Record<
-  NonNullable<LiquidGlassProps["rounded"]>,
+  NonNullable<CardEffectProps["rounded"]>,
   string
 > = {
   sm: "rounded-sm",
@@ -22,7 +22,7 @@ const roundedToClass: Record<
 };
 
 const elevationToClass: Record<
-  NonNullable<LiquidGlassProps["elevation"]>,
+  NonNullable<CardEffectProps["elevation"]>,
   string
 > = {
   sm: "shadow-[0_1px_0_0_rgba(255,255,255,0.15)_inset]",
@@ -30,7 +30,7 @@ const elevationToClass: Record<
   lg: "shadow-[0_1px_0_0_rgba(255,255,255,0.25)_inset,0_12px_30px_-12px_rgba(0,0,0,0.35)]",
 };
 
-export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(
+export const CardEffect = forwardRef<HTMLDivElement, CardEffectProps>(
   (
     {
       asChild = false,
@@ -48,7 +48,7 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(
       <Comp
         className={cn(
           [
-            "liquid-glass",
+            "card-effect",
             "relative",
             "border",
             roundedToClass[rounded],
@@ -70,4 +70,4 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(
     );
   }
 );
-LiquidGlass.displayName = "LiquidGlass";
+CardEffect.displayName = "CardEffect";

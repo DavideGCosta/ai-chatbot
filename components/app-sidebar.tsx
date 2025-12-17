@@ -19,7 +19,7 @@ import {
 } from "@/components/sidebar-history";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
 import { toast } from "@/components/toast";
-import { LiquidGlass } from "@/components/ui/liquid-glass";
+import { CardEffect } from "@/components/ui/card-effect";
 import {
   Sidebar,
   SidebarContent,
@@ -201,7 +201,7 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
             </div>
 
             {/* Panel 2: Primary navigation */}
-            <LiquidGlass className="m-0 mb-2 py-1" rounded="xl">
+            <CardEffect className="m-0 mb-2 py-1" rounded="xl">
               <div
                 className={[
                   "flex",
@@ -300,7 +300,7 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                   </SidebarMenuButton>
                 )}
               </div>
-            </LiquidGlass>
+            </CardEffect>
           </SidebarMenu>
         </SidebarHeader>
 
@@ -308,7 +308,7 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
         <SidebarContent
           className={["flex-1", "px-1.5", "overflow-auto"].join(" ")}
         >
-          <LiquidGlass className={["mb-2"].join(" ")} rounded="xl">
+          <CardEffect className={["mb-2"].join(" ")} rounded="xl">
             {withCollapsedTooltip(
               "Chats",
               <div
@@ -342,7 +342,7 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                     <div
                       className={["flex", "flex-row", "items-center"].join(" ")}
                     >
-                      <span className="text-sidebar-accent-foreground transition-colors duration-200 group-hover/sidebar-item:text-sky-300">
+                      <span className="group-hover/sidebar-item:foreground text-sidebar-accent-foreground transition-colors duration-200">
                         <span className="sidebar-ink">
                           <MessageIcon />
                         </span>
@@ -375,7 +375,7 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
             >
               <SidebarHistory user={user} />
             </div>
-          </LiquidGlass>
+          </CardEffect>
         </SidebarContent>
         <div className="group-data-[collapsible=icon]:flex-grow" />
         {/* Panel 4: Footer */}

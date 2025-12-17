@@ -4,7 +4,7 @@ import { Check, ChevronRight, Circle } from "lucide-react";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import * as React from "react";
 
-import { LiquidGlass } from "@/components/ui/liquid-glass";
+import { CardEffect } from "@/components/ui/card-effect";
 import { cn } from "@/lib/utils";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
@@ -53,9 +53,9 @@ const DropdownMenuSubContent = React.forwardRef<
     ref={ref}
     {...props}
   >
-    <LiquidGlass className="m-0 p-1 text-xs" rounded="lg">
+    <CardEffect className="m-0 p-1 text-xs" rounded="lg">
       {children}
-    </LiquidGlass>
+    </CardEffect>
   </DropdownMenuPrimitive.SubContent>
 ));
 DropdownMenuSubContent.displayName =
@@ -75,9 +75,9 @@ const DropdownMenuContent = React.forwardRef<
       sideOffset={sideOffset}
       {...props}
     >
-      <LiquidGlass className="m-0 p-1 text-xs" rounded="lg">
+      <CardEffect className="m-0 p-1 text-xs" rounded="lg">
         {children}
-      </LiquidGlass>
+      </CardEffect>
     </DropdownMenuPrimitive.Content>
   </DropdownMenuPrimitive.Portal>
 ));

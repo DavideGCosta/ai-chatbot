@@ -2,7 +2,7 @@
 
 import { Tooltip as TooltipPrimitive } from "radix-ui";
 import * as React from "react";
-import { LiquidGlass } from "@/components/ui/liquid-glass";
+import { CardEffect } from "@/components/ui/card-effect";
 import { cn } from "@/lib/utils";
 
 const TooltipProvider = TooltipPrimitive.Provider;
@@ -24,13 +24,13 @@ const TooltipContent = React.forwardRef<
     sideOffset={sideOffset}
     {...props}
   >
-    <LiquidGlass
+    <CardEffect
       className="px-2.5 py-1.5 font-medium text-xs"
       elevation="md"
       rounded="lg"
     >
       {children}
-    </LiquidGlass>
+    </CardEffect>
   </TooltipPrimitive.Content>
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;

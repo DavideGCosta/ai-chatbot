@@ -45,7 +45,6 @@
   --sidebar-accent: hsl(240 4.8% 95.9%);
   --sidebar-accent-foreground: hsl(240 5.9% 10%);
   --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
   --logo: hsl(240 10% 3.9%);
   /* border radius unit */
   --radius: 0.5rem;
@@ -85,7 +84,6 @@
   --sidebar-accent: hsl(240 3.7% 15.9%);
   --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
   --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
   --sidebar: hsl(240 5.9% 10%);
   --logo: #dedede;
 }
@@ -142,7 +140,7 @@
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-foreground: var(--foreground);
   --color-logo: var(--logo);
 }
 
@@ -309,7 +307,7 @@
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-foreground: var(--foreground);
 }
 
 @layer base {
@@ -345,20 +343,20 @@
 @keyframes sidebar-ink-wash {
   0% {
     background-position: -130% center;
-    color: color-mix(in oklab, var(--sidebar-ring) 20%, transparent);
+    color: color-mix(in oklab, var(--foreground) 20%, transparent);
   }
   100% {
     background-position: 130% center;
-    color: var(--sidebar-ring);
+    color: var(--foreground);
   }
 }
 
 .sidebar-ink {
   background-image: linear-gradient(
     120deg,
-    color-mix(in oklab, var(--sidebar-ring) 20%, transparent),
-    var(--sidebar-ring),
-    color-mix(in oklab, var(--sidebar-ring) 20%, transparent)
+    color-mix(in oklab, var(--foreground) 20%, transparent),
+    var(--foreground),
+    color-mix(in oklab, var(--foreground) 20%, transparent)
   );
   background-size: 220% 100%;
   -webkit-background-clip: text;
@@ -373,57 +371,17 @@
   animation: sidebar-ink-wash 0.45s ease forwards;
 }
 
-/* Base liquid glass surface with subtle highlight overlay */
-.liquid-glass {
-  background: color-mix(in oklab, white 75%, rgba(255, 255, 255, 0.65));
-  border-color: color-mix(in oklab, white 45%, transparent);
-  position: relative;
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
-}
-.liquid-glass::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 10px;
-  background:
-    radial-gradient(
-      120% 100% at 0% 0%,
-      rgba(255, 255, 255, 0.25) 0%,
-      rgba(255, 255, 255, 0.06) 35%,
-      transparent 60%
-    ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
-  pointer-events: none;
-}
-.dark .liquid-glass {
-  background: color-mix(in oklab, #050505 90%, rgba(0, 0, 0, 0.45));
-  border-color: color-mix(in oklab, white 20%, transparent);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
-}
-.dark .liquid-glass::before {
-  background:
-    radial-gradient(
-      120% 100% at 0% 0%,
-      rgba(255, 255, 255, 0.18) 0%,
-      rgba(255, 255, 255, 0.04) 35%,
-      transparent 60%
-    ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+/* Generic card effect */
+.card-effect {
+  background: color-mix(in oklab, white 60%, rgba(255, 255, 255, 0.4));
+  border-color: color-mix(in oklab, white 40%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
-.liquid-glass::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  /* Distortion layer: use SVG filter for strong liquid-glass effect */
-  -webkit-backdrop-filter: blur(0px);
-  backdrop-filter: blur(0px);
-  -webkit-filter: url(#container-glass);
-  filter: url(#container-glass);
-  overflow: hidden;
-  isolation: isolate;
-  z-index: -1;
+.dark .card-effect {
+  background: color-mix(in oklab, #0a0a0a 60%, rgba(0, 0, 0, 0.4));
+  border-color: color-mix(in oklab, white 15%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
