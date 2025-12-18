@@ -8,7 +8,6 @@ import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { useDataStream } from "./data-stream-provider";
 import { Conversation, ConversationContent } from "./elements/conversation";
-import { Greeting } from "./greeting";
 import { PreviewMessage, ThinkingMessage } from "./message";
 
 type MessagesProps = {
@@ -61,14 +60,12 @@ function PureMessages({
   return (
     <div className="relative flex-1">
       <div
-        className="absolute w-full h-full overscroll-behavior-contain -webkit-overflow-scrolling-touch touch-pan-y overflow-y-scroll"
+        className="overscroll-behavior-contain -webkit-overflow-scrolling-touch absolute h-full w-full touch-pan-y overflow-y-scroll"
         ref={messagesContainerRef}
         style={{ overflowAnchor: "none" }}
       >
         <Conversation className="mx-auto flex min-w-0 max-w-4xl flex-col gap-4 md:gap-6">
           <ConversationContent className="flex flex-col gap-4 px-2 py-4 md:gap-6 md:px-4">
-            {messages.length === 0 && <Greeting />}
-
             {messages.map((message, index) => (
               <PreviewMessage
                 chatId={chatId}

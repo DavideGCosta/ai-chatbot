@@ -113,7 +113,7 @@ export const Context = ({ className, usage, ...props }: ContextProps) => {
         <button
           className={cn(
             "inline-flex select-none items-center gap-1 rounded-md text-sm",
-            "cursor-pointer bg-background text-foreground",
+            "cursor-pointer text-foreground",
             "outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             className
           )}
