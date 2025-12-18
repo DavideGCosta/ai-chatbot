@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Popover as PopoverPrimitive } from "radix-ui";
 import type { ComponentProps, ReactNode } from "react";
 import {
   Command,
@@ -11,27 +12,25 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
-export type ModelSelectorProps = ComponentProps<typeof Dialog>;
+export type ModelSelectorProps = ComponentProps<typeof PopoverPrimitive.Root>;
 
 export const ModelSelector = (props: ModelSelectorProps) => (
-  <Dialog {...props} />
+  <PopoverPrimitive.Root {...props} />
 );
 
-export type ModelSelectorTriggerProps = ComponentProps<typeof DialogTrigger>;
+export type ModelSelectorTriggerProps = ComponentProps<
+  typeof PopoverPrimitive.Trigger
+>;
 
 export const ModelSelectorTrigger = (props: ModelSelectorTriggerProps) => (
-  <DialogTrigger {...props} />
+  <PopoverPrimitive.Trigger {...props} />
 );
 
-export type ModelSelectorContentProps = ComponentProps<typeof DialogContent> & {
+export type ModelSelectorContentProps = ComponentProps<
+  typeof PopoverPrimitive.Content
+> & {
   title?: ReactNode;
 };
 
@@ -41,12 +40,22 @@ export const ModelSelectorContent = ({
   title = "Model Selector",
   ...props
 }: ModelSelectorContentProps) => (
-  <DialogContent className={cn("p-0", className)} {...props}>
-    <DialogTitle className="sr-only">{title}</DialogTitle>
-    <Command className="**:data-[slot=command-input-wrapper]:h-auto">
-      {children}
-    </Command>
-  </DialogContent>
+  <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Content
+      align="start"
+      className={cn(
+        "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-[320px] overflow-hidden rounded-lg border border-border bg-popover p-0 shadow-lg outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
+        className
+      )}
+      sideOffset={8}
+      {...props}
+    >
+      <span className="sr-only">{title}</span>
+      <Command className="w-full **:data-[slot=command-input-wrapper]:h-auto">
+        {children}
+      </Command>
+    </PopoverPrimitive.Content>
+  </PopoverPrimitive.Portal>
 );
 
 export type ModelSelectorDialogProps = ComponentProps<typeof CommandDialog>;
@@ -61,7 +70,7 @@ export const ModelSelectorInput = ({
   className,
   ...props
 }: ModelSelectorInputProps) => (
-  <CommandInput className={cn("h-auto py-3.5", className)} {...props} />
+  <CommandInput className={cn("h-auto py-1.5", className)} {...props} />
 );
 
 export type ModelSelectorListProps = ComponentProps<typeof CommandList>;
