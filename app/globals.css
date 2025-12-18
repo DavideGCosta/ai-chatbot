@@ -384,7 +384,7 @@
 }
 
 .dark .card-effect {
-  background: color-mix(in oklab, var(--background) 60%, rgba(0, 0, 0, 0.4));
+  background: color-mix(in oklab, var(--accent) 20%, transparent);
   border-color: color-mix(in oklab, var(--foreground) 5%, transparent);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);

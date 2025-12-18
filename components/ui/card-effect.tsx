@@ -54,8 +54,6 @@ export const CardEffect = forwardRef<HTMLDivElement, CardEffectProps>(
             roundedToClass[rounded],
             elevationToClass[elevation],
             "transition-colors",
-            "bg-background/70",
-            "backdrop-blur-xl",
           ].join(" "),
           interactive
             ? [

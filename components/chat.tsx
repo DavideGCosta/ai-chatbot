@@ -164,11 +164,11 @@ export function Chat({
     <>
       <div className="overscroll-behavior-contain flex h-full min-h-0 min-w-0 touch-pan-y flex-col bg-background">
         {messages.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center px-2 pb-10 pt-8 md:px-4 md:pt-14">
+          <div className="-mt-32 flex flex-1 items-center justify-center px-2 md:px-4">
             <div className="w-full max-w-4xl">
               <Greeting className="px-2 md:px-0" />
               {!isReadonly && (
-                <div className="mx-auto mt-8 w-full max-w-3xl px-2 md:px-0">
+                <div className="mx-auto mt-6 w-full max-w-3xl px-2 md:px-0">
                   <MultimodalInput
                     attachments={attachments}
                     chatId={id}
@@ -177,15 +177,15 @@ export function Chat({
                     onModelChange={setCurrentModelId}
                     selectedModelId={currentModelId}
                     selectedVisibilityType={visibilityType}
-                  sendMessage={sendMessage}
-                  setAttachments={setAttachments}
-                  setInput={setInput}
-                  setMessages={setMessages}
-                  status={status}
-                  stop={stop}
-                />
-              </div>
-            )}
+                    sendMessage={sendMessage}
+                    setAttachments={setAttachments}
+                    setInput={setInput}
+                    setMessages={setMessages}
+                    status={status}
+                    stop={stop}
+                  />
+                </div>
+              )}
             </div>
           </div>
         ) : (

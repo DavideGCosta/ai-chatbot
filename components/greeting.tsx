@@ -17,7 +17,7 @@ export const Greeting = ({ className }: GreetingProps) => {
     >
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="text-md text-muted-foreground"
+        className="text-lg text-muted-foreground"
         exit={{ opacity: 0, y: 10 }}
         initial={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.5 }}
@@ -26,7 +26,7 @@ export const Greeting = ({ className }: GreetingProps) => {
       </motion.div>
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="mt-2 text-4xl tracking-tight"
+        className="mt-2 text-3xl tracking-tight"
         exit={{ opacity: 0, y: 10 }}
         initial={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.6 }}
