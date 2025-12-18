@@ -1,5 +1,4 @@
 import type { ArtifactKind } from "@/components/artifact";
-import type { AppUsage } from "@/lib/usage";
 
 export type ChatVisibility = "private" | "public";
 
@@ -9,7 +8,6 @@ export type Chat = {
   title: string;
   userId: string;
   visibility: ChatVisibility;
-  lastContext: AppUsage | null;
 };
 
 export type DBMessage = {

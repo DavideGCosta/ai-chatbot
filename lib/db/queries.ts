@@ -4,7 +4,6 @@ import type { VisibilityType } from "@/components/visibility-selector";
 import { ChatSDKError } from "@/lib/errors";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { AppUsage } from "@/lib/usage";
 import type { Chat, DBMessage, Document, Suggestion, Vote } from "./schema";
 
 const CHAT_TABLE = "chat_conversations";
@@ -31,7 +30,6 @@ type ChatRow = {
   title: string;
   user_id: string;
   visibility: VisibilityType;
-  last_context: AppUsage | null;
 };
 
 type MessageRow = {
@@ -76,7 +74,6 @@ const mapChat = (row: ChatRow): Chat => ({
   title: row.title,
   userId: row.user_id,
   visibility: row.visibility,
-  lastContext: row.last_context,
 });
 
 const mapMessage = (row: MessageRow): DBMessage => ({
@@ -673,22 +670,22 @@ export async function updateChatVisibilityById({
   }
 }
 
-export async function updateChatLastContextById({
+export async function updateChatTitleById({
   chatId,
-  context,
+  title,
 }: {
   chatId: string;
-  context: AppUsage;
+  title: string;
 }) {
   const supabase = await createSupabaseServerClient();
 
   try {
     await supabase
       .from(CHAT_TABLE)
-      .update({ last_context: context })
+      .update({ title })
       .eq("id", chatId);
   } catch (error) {
-    console.warn("Failed to update lastContext for chat", chatId, error);
+    console.warn("Failed to update title for chat", chatId, error);
   }
 }
 

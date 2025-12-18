@@ -125,8 +125,9 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
       loading: "Deleting all chats...",
       success: () => {
         mutate(unstable_serialize(getChatHistoryPaginationKey));
-        router.push("/");
         setShowDeleteAllDialog(false);
+        router.replace("/");
+        router.refresh();
         return "All chats deleted successfully";
       },
       error: (error) =>
