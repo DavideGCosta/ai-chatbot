@@ -97,7 +97,8 @@ export function SidebarUserNav({
                 className={cn(
                   "h-12 gap-3 bg-background/70 text-left",
                   "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
-                  "group-data-[collapsible=icon]:!gap-0 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:overflow-visible"
+                  "group-data-[collapsible=icon]:!gap-0 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:overflow-visible",
+                  "cursor-pointer"
                 )}
                 data-testid="user-nav-button"
               >
@@ -135,7 +136,7 @@ export function SidebarUserNav({
                   imageUrl={user.avatarUrl}
                 />
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-sm">
+                  <p className="truncate border-white font-semibold text-sm">
                     {displayName}
                   </p>
                   {!isGuest && (
@@ -223,8 +224,8 @@ function UserAvatar({
   const [hasError, setHasError] = useState(false);
   const initials = fallbackLabel.trim().slice(0, 2).toUpperCase() || "SC";
 
-  const dimension = size === "sm" ? 32 : 30;
-  const wrapperClass = size === "sm" ? "size-8" : "size-[30px]";
+  const dimension = size === "sm" ? 32 : 32;
+  const wrapperClass = size === "sm" ? "size-8" : "size-[32px]";
 
   const shouldUseGeneratedAvatar = !imageUrl || hasError;
 
@@ -232,7 +233,7 @@ function UserAvatar({
     return (
       <div
         className={cn(
-          "flex items-center justify-center rounded-full bg-sidebar-accent font-semibold text-sidebar-accent-foreground text-xs uppercase",
+          "flex items-center justify-center rounded-full bg-foreground/10 font-semibold text-sidebar-accent-foreground text-xs uppercase",
           wrapperClass
         )}
       >

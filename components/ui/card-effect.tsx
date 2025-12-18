@@ -25,9 +25,9 @@ const elevationToClass: Record<
   NonNullable<CardEffectProps["elevation"]>,
   string
 > = {
-  sm: "shadow-[0_1px_0_0_rgba(255,255,255,0.15)_inset]",
-  md: "shadow-[0_1px_0_0_rgba(255,255,255,0.2)_inset,0_6px_20px_-8px_rgba(0,0,0,0.25)]",
-  lg: "shadow-[0_1px_0_0_rgba(255,255,255,0.25)_inset,0_12px_30px_-12px_rgba(0,0,0,0.35)]",
+  sm: "shadow-none",
+  md: "shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]",
+  lg: "shadow-[0px_4px_6px_-2px_rgba(0,0,0,0.05),0px_10px_15px_-3px_rgba(0,0,0,0.1)]",
 };
 
 export const CardEffect = forwardRef<HTMLDivElement, CardEffectProps>(
@@ -54,6 +54,8 @@ export const CardEffect = forwardRef<HTMLDivElement, CardEffectProps>(
             roundedToClass[rounded],
             elevationToClass[elevation],
             "transition-colors",
+            "bg-background/70",
+            "backdrop-blur-xl",
           ].join(" "),
           interactive
             ? [

@@ -1,17 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import {
   MarketsIcon,
+  MarketsIconFill,
   MessageIcon,
+  MessageIconFill,
   PlusIcon,
   PortfolioIcon,
+  PortfolioIconFill,
   SciQntIcon,
   SpacesIcon,
+  SpacesIconFill,
 } from "@/components/icons";
 import {
   getChatHistoryPaginationKey,
@@ -44,6 +48,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function AppSidebar({ user }: { user: AppUser | undefined }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { setOpenMobile, state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
   const disabledNavButtonClasses = [
@@ -70,7 +75,7 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
     "font-semibold",
     "uppercase",
     "tracking-wide",
-    "text-sky-200",
+    "text-sky-400",
     "group-data-[collapsible=icon]:hidden",
   ].join(" ");
 
@@ -223,7 +228,11 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                     <div className="flex w-full items-center gap-2">
                       <span className="text-sidebar-accent-foreground">
                         <span className="sidebar-ink">
-                          <MarketsIcon />
+                          {pathname?.startsWith("/markets") ? (
+                            <MarketsIconFill />
+                          ) : (
+                            <MarketsIcon />
+                          )}
                         </span>
                       </span>
                       <span
@@ -252,7 +261,11 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                     <div className="flex w-full items-center gap-2">
                       <span className="text-sidebar-accent-foreground">
                         <span className="sidebar-ink">
-                          <PortfolioIcon />
+                          {pathname?.startsWith("/portfolio") ? (
+                            <PortfolioIconFill />
+                          ) : (
+                            <PortfolioIcon />
+                          )}
                         </span>
                       </span>
                       <span
@@ -281,7 +294,11 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                     <div className="flex w-full items-center gap-2">
                       <span className="text-sidebar-accent-foreground">
                         <span className="sidebar-ink">
-                          <SpacesIcon />
+                          {pathname?.startsWith("/spaces") ? (
+                            <SpacesIconFill />
+                          ) : (
+                            <SpacesIcon />
+                          )}
                         </span>
                       </span>
                       <span
@@ -307,7 +324,7 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
 
         {/* Panel 3: Chats link + history */}
         <SidebarContent
-          className={["flex-1", "px-1.5", "overflow-hidden"].join(" ")}
+          className={["flex-1", "px-1", "overflow-hidden"].join(" ")}
         >
           <CardEffect
             className={[
@@ -326,6 +343,7 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                   "flex",
                   "items-center",
                   "justify-between",
+                  "group-data-[collapsible=icon]:justify-center",
                   "py-1",
                   "px-1",
                 ].join(" ")}
@@ -354,7 +372,11 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                     >
                       <span className="group-hover/sidebar-item:foreground text-sidebar-accent-foreground transition-colors duration-200">
                         <span className="sidebar-ink">
-                          <MessageIcon />
+                          {pathname === "/" || pathname?.startsWith("/chat") ? (
+                            <MessageIconFill />
+                          ) : (
+                            <MessageIcon />
+                          )}
                         </span>
                       </span>
                       <span
@@ -370,7 +392,12 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                       </span>
                     </div>
                     <div
-                      className={["flex", "flex-row", "items-center"].join(" ")}
+                      className={[
+                        "flex",
+                        "flex-row",
+                        "items-center",
+                        "group-data-[collapsible=icon]:hidden",
+                      ].join(" ")}
                     >
                       <PlusIcon />
                     </div>

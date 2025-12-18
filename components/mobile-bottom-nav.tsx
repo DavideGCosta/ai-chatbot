@@ -1,18 +1,22 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   MarketsIcon,
-  MessageIcon,
+  MarketsIconFill,
+  MenuIcon,
   PlusIcon,
   PortfolioIcon,
+  PortfolioIconFill,
   SpacesIcon,
+  SpacesIconFill,
 } from "@/components/icons";
 import { toast } from "@/components/toast";
 import { useSidebar } from "@/components/ui/sidebar";
 
 export function MobileBottomNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const { isMobile, setOpenMobile, setOpen } = useSidebar();
 
   const handleComingSoon = (label: string) => {
@@ -37,12 +41,14 @@ export function MobileBottomNav() {
   const leftMenuItems = [
     {
       label: "Markets",
-      Icon: MarketsIcon,
+      Icon: pathname?.startsWith("/markets") ? MarketsIconFill : MarketsIcon,
       onClick: () => handleComingSoon("Markets"),
     },
     {
       label: "Portfolio",
-      Icon: PortfolioIcon,
+      Icon: pathname?.startsWith("/portfolio")
+        ? PortfolioIconFill
+        : PortfolioIcon,
       onClick: () => handleComingSoon("Portfolio"),
     },
   ];
@@ -50,10 +56,10 @@ export function MobileBottomNav() {
   const rightMenuItems = [
     {
       label: "Spaces",
-      Icon: SpacesIcon,
+      Icon: pathname?.startsWith("/spaces") ? SpacesIconFill : SpacesIcon,
       onClick: () => handleComingSoon("Spaces"),
     },
-    { label: "Chats", Icon: MessageIcon, onClick: handleChatMenuClick },
+    { label: "More", Icon: MenuIcon, onClick: handleChatMenuClick },
   ];
 
   return (
@@ -93,11 +99,14 @@ export function MobileBottomNav() {
         </div>
         <button
           aria-label="Start a new chat"
-          className="-top-2 absolute flex items-center justify-center rounded-full border border-border/70 bg-primary p-5 text-primary-foreground shadow-primary/40 shadow-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/50"
+          className="-top-2 gap- absolute flex h-18 w-18 flex-col items-center justify-center"
           onClick={handleNewChat}
           type="button"
         >
-          <PlusIcon size={22} />
+          <div className="rounded-full border border-border/70 bg-primary p-3.5 text-primary-foreground shadow-primary/40 shadow-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/50">
+            <PlusIcon size={22} />
+          </div>
+          <span className="font-semibold text-[10px]">New Chat</span>
         </button>
       </div>
     </nav>
