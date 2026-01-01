@@ -11,6 +11,7 @@ import { Conversation, ConversationContent } from "./elements/conversation";
 import { PreviewMessage, ThinkingMessage } from "./message";
 
 type MessagesProps = {
+  addToolApprovalResponse: UseChatHelpers<ChatMessage>["addToolApprovalResponse"];
   chatId: string;
   status: UseChatHelpers<ChatMessage>["status"];
   votes: Vote[] | undefined;
@@ -23,6 +24,7 @@ type MessagesProps = {
 };
 
 function PureMessages({
+  addToolApprovalResponse,
   chatId,
   status,
   votes,
@@ -68,6 +70,7 @@ function PureMessages({
           <ConversationContent className="flex flex-col gap-4 px-2 py-4 md:gap-6 md:px-4">
             {messages.map((message, index) => (
               <PreviewMessage
+                addToolApprovalResponse={addToolApprovalResponse}
                 chatId={chatId}
                 isLoading={
                   status === "streaming" && messages.length - 1 === index
@@ -89,7 +92,12 @@ function PureMessages({
             ))}
 
             <AnimatePresence mode="wait">
-              {status === "submitted" && <ThinkingMessage key="thinking" />}
+              {status === "submitted" &&
+                !messages.some((msg) =>
+                  msg.parts?.some(
+                    (part) => "state" in part && part.state === "approval-responded"
+                  )
+                ) && <ThinkingMessage key="thinking" />}
             </AnimatePresence>
 
             <div

@@ -317,6 +317,29 @@ export async function saveMessages({ messages }: { messages: DBMessage[] }) {
   }
 }
 
+export async function updateMessage({
+  id,
+  parts,
+}: {
+  id: string;
+  parts: DBMessage["parts"];
+}) {
+  const supabase = await createSupabaseServerClient();
+
+  try {
+    const { error } = await supabase
+      .from(MESSAGE_TABLE)
+      .update({ parts })
+      .eq("id", id);
+
+    if (error) {
+      throw error;
+    }
+  } catch (_error) {
+    throw new ChatSDKError("bad_request:database", "Failed to update message");
+  }
+}
+
 export async function getMessagesByChatId({ id }: { id: string }) {
   const supabase = await createSupabaseServerClient();
 

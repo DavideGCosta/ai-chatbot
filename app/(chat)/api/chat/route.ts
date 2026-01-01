@@ -14,7 +14,6 @@ import {
 } from "resumable-stream";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
-import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { getLanguageModel } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
@@ -32,6 +31,7 @@ import {
   saveChat,
   saveMessages,
   updateChatTitleById,
+  updateMessage,
 } from "@/lib/db/queries";
 import type { DBMessage } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
@@ -78,13 +78,9 @@ export async function POST(request: Request) {
     const {
       id,
       message,
+      messages,
       selectedChatModel,
       selectedVisibilityType,
-    }: {
-      id: string;
-      message: ChatMessage;
-      selectedChatModel: ChatModel["id"];
-      selectedVisibilityType: VisibilityType;
     } = requestBody;
 
     const session = await getSession();
@@ -104,6 +100,10 @@ export async function POST(request: Request) {
       return new ChatSDKError("rate_limit:chat").toResponse();
     }
 
+    const isToolApprovalFlow = Boolean(messages);
+    if (!isToolApprovalFlow && !message) {
+      return new ChatSDKError("bad_request:api").toResponse();
+    }
     const chat = await getChatById({ id });
     let messagesFromDb: DBMessage[] = [];
     let titlePromise: Promise<string> | null = null;
@@ -112,10 +112,10 @@ export async function POST(request: Request) {
       if (chat.userId !== session.user.id) {
         return new ChatSDKError("forbidden:chat").toResponse();
       }
-      // Only fetch messages if chat already exists
-      messagesFromDb = await getMessagesByChatId({ id });
-    } else {
-      // Save chat immediately with a placeholder title
+      if (!isToolApprovalFlow) {
+        messagesFromDb = await getMessagesByChatId({ id });
+      }
+    } else if (message?.role === "user") {
       await saveChat({
         id,
         userId: session.user.id,
@@ -123,12 +123,14 @@ export async function POST(request: Request) {
         visibility: selectedVisibilityType,
       });
 
-      // Kick off title generation in the background
       titlePromise = generateTitleFromUserMessage({ message });
-      // New chat - no need to fetch messages, it's empty
+    } else {
+      return new ChatSDKError("bad_request:chat").toResponse();
     }
 
-    const uiMessages = [...convertToUIMessages(messagesFromDb), message];
+    const uiMessages: ChatMessage[] = isToolApprovalFlow
+      ? (messages as ChatMessage[])
+      : [...convertToUIMessages(messagesFromDb), message as ChatMessage];
 
     const { longitude, latitude, city, country } = geolocation(request);
 
@@ -139,24 +141,27 @@ export async function POST(request: Request) {
       country,
     };
 
-    await saveMessages({
-      messages: [
-        {
-          chatId: id,
-          id: message.id,
-          role: "user",
-          parts: message.parts,
-          attachments: [],
-          createdAt: new Date(),
-        },
-      ],
-    });
+    if (message?.role === "user") {
+      await saveMessages({
+        messages: [
+          {
+            chatId: id,
+            id: message.id,
+            role: "user",
+            parts: message.parts,
+            attachments: [],
+            createdAt: new Date(),
+          },
+        ],
+      });
+    }
 
     const streamId = generateUUID();
     await createStreamId({ streamId, chatId: id });
 
     const stream = createUIMessageStream({
-      execute: ({ writer: dataStream }) => {
+      originalMessages: isToolApprovalFlow ? uiMessages : undefined,
+      execute: async ({ writer: dataStream }) => {
         // Handle async title generation in parallel for new chats
         if (titlePromise) {
           titlePromise.then((title) => {
@@ -172,7 +177,7 @@ export async function POST(request: Request) {
         const result = streamText({
           model: getLanguageModel(selectedChatModel),
           system: systemPrompt({ selectedChatModel, requestHints }),
-          messages: convertToModelMessages(uiMessages),
+          messages: await convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_activeTools: isReasoningModel
             ? []
@@ -216,32 +221,63 @@ export async function POST(request: Request) {
         );
       },
       generateId: generateUUID,
-      onFinish: async ({ messages }) => {
-        await saveMessages({
-          messages: messages.map((currentMessage) => ({
-            id: currentMessage.id,
-            role: currentMessage.role,
-            parts: currentMessage.parts,
-            createdAt: new Date(),
-            attachments: [],
-            chatId: id,
-          })),
-        });
+      onFinish: async ({ messages: finishedMessages }) => {
+        if (isToolApprovalFlow) {
+          for (const finishedMsg of finishedMessages) {
+            const existingMsg = uiMessages.find((m) => m.id === finishedMsg.id);
+            if (existingMsg) {
+              await updateMessage({
+                id: finishedMsg.id,
+                parts: finishedMsg.parts,
+              });
+            } else {
+              await saveMessages({
+                messages: [
+                  {
+                    id: finishedMsg.id,
+                    role: finishedMsg.role,
+                    parts: finishedMsg.parts,
+                    createdAt: new Date(),
+                    attachments: [],
+                    chatId: id,
+                  },
+                ],
+              });
+            }
+          }
+        } else if (finishedMessages.length > 0) {
+          await saveMessages({
+            messages: finishedMessages.map((currentMessage) => ({
+              id: currentMessage.id,
+              role: currentMessage.role,
+              parts: currentMessage.parts,
+              createdAt: new Date(),
+              attachments: [],
+              chatId: id,
+            })),
+          });
+        }
       },
       onError: () => {
         return "Oops, an error occurred!";
       },
     });
 
-    // const streamContext = getStreamContext();
+    const streamContext = getStreamContext();
 
-    // if (streamContext) {
-    //   return new Response(
-    //     await streamContext.resumableStream(streamId, () =>
-    //       stream.pipeThrough(new JsonToSseTransformStream())
-    //     )
-    //   );
-    // }
+    if (streamContext) {
+      try {
+        const resumableStream = await streamContext.resumableStream(
+          streamId,
+          () => stream.pipeThrough(new JsonToSseTransformStream())
+        );
+        if (resumableStream) {
+          return new Response(resumableStream);
+        }
+      } catch (error) {
+        console.error("Failed to create resumable stream:", error);
+      }
+    }
 
     return new Response(stream.pipeThrough(new JsonToSseTransformStream()));
   } catch (error) {
