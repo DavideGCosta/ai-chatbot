@@ -86,6 +86,7 @@ function PureMultimodalInput({
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
+  const hasAutoFocused = useRef(false);
 
   const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
@@ -98,6 +99,16 @@ function PureMultimodalInput({
       adjustHeight();
     }
   }, [adjustHeight]);
+
+  useEffect(() => {
+    if (!hasAutoFocused.current && width) {
+      const timer = setTimeout(() => {
+        textareaRef.current?.focus();
+        hasAutoFocused.current = true;
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [width]);
 
   const resetHeight = useCallback(() => {
     if (textareaRef.current) {
@@ -344,8 +355,7 @@ function PureMultimodalInput({
         )}
         <div className="flex flex-row items-start gap-1 sm:gap-2">
           <PromptInputTextarea
-            autoFocus
-            className="grow resize-none border-0! border-none! bg-transparent p-2 text-sm outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:hidden"
+            className="grow resize-none border-0! border-none! bg-transparent p-2 text-base outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:hidden"
             data-testid="multimodal-input"
             disableAutoResize={true}
             maxHeight={200}
