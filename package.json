@@ -6,14 +6,14 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "npx ultracite@latest check",
-    "format": "npx ultracite@latest fix",
+    "lint": "ultracite check",
+    "format": "ultracite fix",
     "test": "export PLAYWRIGHT=True && pnpm exec playwright test"
   },
   "dependencies": {
-    "@ai-sdk/gateway": "2.0.0-beta.85",
-    "@ai-sdk/provider": "3.0.0-beta.27",
-    "@ai-sdk/react": "3.0.0-beta.162",
+    "@ai-sdk/gateway": "^3.0.15",
+    "@ai-sdk/provider": "^3.0.3",
+    "@ai-sdk/react": "3.0.39",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/lang-python": "^6.1.6",
     "@codemirror/state": "^6.5.0",
@@ -45,7 +45,7 @@
     "@vercel/functions": "^2.0.0",
     "@vercel/otel": "^1.12.0",
     "@xyflow/react": "^12.10.0",
-    "ai": "6.0.0-beta.159",
+    "ai": "6.0.37",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
@@ -82,11 +82,11 @@
     "react-resizable-panels": "^2.1.7",
     "react-syntax-highlighter": "^15.6.6",
     "redis": "^5.0.0",
-    "resumable-stream": "^2.0.0",
+    "resumable-stream": "^2.2.10",
     "server-only": "^0.0.1",
-    "shiki": "^3.14.0",
+    "shiki": "^3.21.0",
     "sonner": "^1.5.0",
-    "streamdown": "^1.4.0",
+    "streamdown": "^2.0.1",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
@@ -96,7 +96,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.2",
+    "@biomejs/biome": "2.3.11",
     "@playwright/test": "^1.50.1",
     "@tailwindcss/postcss": "^4.1.13",
     "@tailwindcss/typography": "^0.5.15",
@@ -111,7 +111,7 @@
     "tailwindcss": "^4.1.13",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3",
-    "ultracite": "5.3.9"
+    "ultracite": "^7.0.11"
   },
   "packageManager": "pnpm@9.12.3"
 }

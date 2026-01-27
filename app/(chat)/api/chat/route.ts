@@ -2,7 +2,7 @@ import { geolocation } from "@vercel/functions";
 import {
   convertToModelMessages,
   createUIMessageStream,
-  JsonToSseTransformStream,
+  createUIMessageStreamResponse,
   smoothStream,
   stepCountIs,
   streamText,
@@ -12,7 +12,6 @@ import {
   createResumableStreamContext,
   type ResumableStreamContext,
 } from "resumable-stream";
-import type { VisibilityType } from "@/components/visibility-selector";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { getLanguageModel } from "@/lib/ai/providers";
@@ -75,13 +74,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const {
-      id,
-      message,
-      messages,
-      selectedChatModel,
-      selectedVisibilityType,
-    } = requestBody;
+    const { id, message, messages, selectedChatModel, selectedVisibilityType } =
+      requestBody;
 
     const session = await getSession();
 
@@ -212,13 +206,13 @@ export async function POST(request: Request) {
           },
         });
 
-        result.consumeStream();
+        dataStream.merge(result.toUIMessageStream({ sendReasoning: true }));
 
-        dataStream.merge(
-          result.toUIMessageStream({
-            sendReasoning: true,
-          })
-        );
+        if (titlePromise) {
+          const title = await titlePromise;
+          dataStream.write({ type: "data-chat-title", data: title });
+          updateChatTitleById({ chatId: id, title });
+        }
       },
       generateId: generateUUID,
       onFinish: async ({ messages: finishedMessages }) => {
@@ -263,23 +257,27 @@ export async function POST(request: Request) {
       },
     });
 
-    const streamContext = getStreamContext();
-
-    if (streamContext) {
-      try {
-        const resumableStream = await streamContext.resumableStream(
-          streamId,
-          () => stream.pipeThrough(new JsonToSseTransformStream())
-        );
-        if (resumableStream) {
-          return new Response(resumableStream);
+    return createUIMessageStreamResponse({
+      stream,
+      async consumeSseStream({ stream: sseStream }) {
+        if (!process.env.REDIS_URL) {
+          return;
         }
-      } catch (error) {
-        console.error("Failed to create resumable stream:", error);
-      }
-    }
-
-    return new Response(stream.pipeThrough(new JsonToSseTransformStream()));
+        try {
+          const streamContext = getStreamContext();
+          if (streamContext) {
+            const resumableStreamId = generateUUID();
+            await createStreamId({ streamId: resumableStreamId, chatId: id });
+            await streamContext.createNewResumableStream(
+              resumableStreamId,
+              () => sseStream
+            );
+          }
+        } catch (_) {
+          // ignore redis errors
+        }
+      },
+    });
   } catch (error) {
     const vercelId = request.headers.get("x-vercel-id");
 
