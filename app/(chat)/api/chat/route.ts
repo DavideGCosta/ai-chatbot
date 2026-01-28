@@ -273,7 +273,7 @@ export async function POST(request: Request) {
               () => sseStream
             );
           }
-        } catch (_) {
+        } catch {
           // ignore redis errors
         }
       },
